@@ -145,7 +145,7 @@ If-Match: {etag}
 |------------------------|-----------------------------------------------------------|----------------------------|
 | defaultDimensions      | `.../employees({id})/defaultDimensions`                   | GET, POST, PATCH, DELETE   |
 | picture                | `.../employees({id})/picture`                             | GET, PATCH, DELETE          |
-| timeRegistrationEntries| `.../employees({id})/timeRegistrationEntries`             | GET, POST, PATCH, DELETE   |
+| timeRegistrationEntries| `.../employees({id})/timeRegistrationEntries`             | GET only                   | To create entries, POST to top-level `/timeRegistrationEntries` with `employeeNumber` in body |
 
 ---
 

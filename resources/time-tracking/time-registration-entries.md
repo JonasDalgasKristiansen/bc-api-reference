@@ -84,6 +84,8 @@ Authorization: Bearer {access_token}
 
 ### What NOT to Do
 
+- ❌ Do NOT POST to `/employees({id})/timeRegistrationEntries` — always POST to the **top-level** `/timeRegistrationEntries`
+- ❌ Do NOT use `employeeId` (GUID) in the POST body — use `employeeNumber` (short code like `"MH"`, `"R0010"`)
 - ❌ Do NOT post entries with dates across multiple weeks in one batch — each week has a separate Time Sheet
 - ❌ Do NOT try to create Time Sheet headers via the API — use "Create Time Sheets" in BC
 - ❌ Do NOT create one entry per hour — create one entry per date with total `quantity` (hours) for that day
@@ -91,16 +93,22 @@ Authorization: Bearer {access_token}
 
 ---
 
-## Base Endpoint
+## Base Endpoint — ALWAYS USE THIS
 
 ```
 {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries
 ```
 
-Also available as a sub-resource under employees:
+> **⚠️ ALWAYS use the top-level endpoint above for creating time entries.**
+> 
+> There is also a sub-resource under employees (`/employees({employeeId})/timeRegistrationEntries`) but **DO NOT use it for POST/create operations** — it requires a GUID and causes errors. Use it only for GET (reading entries for a specific employee).
+>
+> **For creating entries:** POST to the top-level `/timeRegistrationEntries` endpoint and pass `employeeNumber` (the short code like `"MH"` or `"R0010"`) in the JSON body — NOT `employeeId` (a GUID).
+
+### Read-only sub-resource (GET only)
 
 ```
-{{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/employees({employeeId})/timeRegistrationEntries
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/employees({employeeId})/timeRegistrationEntries
 ```
 
 ---
@@ -154,7 +162,9 @@ Accept: application/json
 
 > **Note:** The field `lastModfiedDateTime` is intentionally misspelled (missing an 'i') — this is the actual field name in Microsoft's API.
 
-### 2. Get Entries for a Specific Employee
+### 2. Get Entries for a Specific Employee (GET only)
+
+> The employee sub-resource endpoint is only for **reading** entries. Never POST to this URL — always POST to the top-level `/timeRegistrationEntries` endpoint.
 
 ```http
 GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/employees({employeeId})/timeRegistrationEntries
@@ -172,7 +182,10 @@ Accept: application/json
 
 ### 4. Create a Time Registration Entry (Add a Line to Existing Time Sheet)
 
-> **IMPORTANT:** This adds a line to the Time Sheet that covers the specified `date`. The Time Sheet must already exist in BC for that employee's resource and week. Do NOT use this to create a new Time Sheet — Time Sheets are created via the "Create Time Sheets" batch job in the BC client.
+> **IMPORTANT — READ ALL OF THIS:**
+> - **URL:** Always POST to the **top-level** `/timeRegistrationEntries` endpoint. NEVER POST to `/employees({id})/timeRegistrationEntries`.
+> - **Employee field:** Use `employeeNumber` (the short code like `"MH"`, `"R0010"`, `"EMP001"`) — NOT `employeeId` (a GUID). If you pass `employeeId`, BC returns: *"The Employee does not exist. Identification fields and values: No.=''"*
+> - **Time Sheet:** The Time Sheet must already exist in BC for that employee's resource and week. Do NOT try to create a new Time Sheet via the API.
 
 ```http
 POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries
@@ -180,10 +193,8 @@ Authorization: Bearer {access_token}
 Content-Type: application/json
 
 {
-  "employeeNumber": "EMP001",
-  "jobNumber": "J10000",
-  "jobTaskNumber": "JT1000",
-  "date": "2024-06-17",
+  "employeeNumber": "MH",
+  "date": "2026-02-17",
   "quantity": 8.0
 }
 ```
@@ -259,8 +270,8 @@ If-Match: {etag}
 | Field                  | Type     | Editable | Description                                       |
 |------------------------|----------|----------|---------------------------------------------------|
 | `id`                   | GUID     | No       | Unique identifier                                 |
-| `employeeId`           | GUID     | Yes      | Employee identifier                               |
-| `employeeNumber`       | string   | Yes      | Employee number (alternative to employeeId)       |
+| `employeeId`           | GUID     | No       | Employee GUID (read-only — returned in response, do NOT send in POST body) |
+| `employeeNumber`       | string   | Yes      | **USE THIS** — Employee number/code (e.g., "MH", "R0010"). Always use this when creating entries. |
 | `jobId`                | GUID     | No       | Project/job identifier (read-only, set via jobNumber) |
 | `jobNumber`            | string   | Yes      | Project/job number                                |
 | `jobTaskNumber`        | string   | Yes      | Job task number within the project                |

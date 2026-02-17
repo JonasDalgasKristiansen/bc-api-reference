@@ -94,6 +94,17 @@ Common mistakes to avoid:
 - ❌ `commissionPercent` → ✅ `commisionPercent` (Microsoft's typo — use it as-is)
 - ❌ `companies({guid})` → ✅ `companies(name='{BC_COMPANY_NAME}')`
 - ❌ `/jobs` → ✅ `/projects` (v22.0+) or OData `/Jobs` web service (all versions)
+- ❌ POST to `/employees({id})/timeRegistrationEntries` → ✅ POST to `/timeRegistrationEntries` (top-level)
+- ❌ `employeeId` in POST body → ✅ `employeeNumber` in POST body (short code like `"MH"`, not a GUID)
+
+### Time Registration Entries — CRITICAL
+
+When creating time entries:
+- **ALWAYS** POST to the **top-level** endpoint: `/companies(name='...')/timeRegistrationEntries`
+- **NEVER** POST to the employee sub-resource: `/employees({id})/timeRegistrationEntries`
+- **ALWAYS** use `employeeNumber` (the short employee code like `"MH"` or `"R0010"`) in the request body
+- **NEVER** use `employeeId` (a GUID) in the request body — BC will error with: *"The Employee does not exist"*
+- The employee sub-resource endpoint is **GET-only** — use it only to read entries for a specific employee
 
 ### Projects / Jobs — 404 Warning
 
