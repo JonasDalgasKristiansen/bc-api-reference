@@ -39,8 +39,8 @@ client_id={{BC_CLIENT_ID}}
 | Resource                  | Endpoint                                                      | Description                              |
 |---------------------------|---------------------------------------------------------------|------------------------------------------|
 | [Companies](companies.md) | `{{BC_AUTOMATION_URL}}/companies`                           | List and manage companies                |
-| [Users](users.md)         | `{{BC_AUTOMATION_URL}}/companies({id})/users`               | Manage users and permissions             |
-| [Extensions](extensions.md)| `{{BC_AUTOMATION_URL}}/companies({id})/extensions`         | Manage installed extensions              |
+| [Users](users.md)         | `{{BC_AUTOMATION_URL}}/companies(name='{{BC_COMPANY_NAME}}')/users`               | Manage users and permissions             |
+| [Extensions](extensions.md)| `{{BC_AUTOMATION_URL}}/companies(name='{{BC_COMPANY_NAME}}')/extensions`         | Manage installed extensions              |
 | [Environments](environments.md)| Admin Center API (separate)                             | Manage environments (sandbox/production) |
 
 ---

@@ -107,4 +107,4 @@ Authorization: Bearer {access_token}
 |--------|------------------------|------------------------------------------------------------------------------------|
 | `401`  | Unauthorized           | Access token invalid or missing D365 AUTOMATION permission.                        |
 | `403`  | Forbidden              | App registration does not have Automation API permissions.                          |
-| `404`  | Not Found              | Company ID does not exist.                                                         |
+| `404`  | Not Found              | Company name does not match any company.                                           |

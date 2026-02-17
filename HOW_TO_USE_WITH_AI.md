@@ -214,7 +214,7 @@ Next.js application with the following features:
    - Show confirmation modal before posting
    - Handle 409 ETag conflict by re-fetching and retrying
 
-All API base URLs, company ID, and credentials come from .env variables
+All API base URLs, company name, and credentials come from .env variables
 as defined in .env.example. Never hardcode any values.
 ```
 

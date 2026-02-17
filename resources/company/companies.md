@@ -1,6 +1,6 @@
 # Companies
 
-The companies endpoint is the root of all Business Central API calls. It lists all companies accessible with your credentials and is the **only root-level endpoint** — every other endpoint requires a company ID in the path.
+The companies endpoint is the root of all Business Central API calls. It lists all companies accessible with your credentials and is the **only root-level endpoint** — every other endpoint requires a company name in the path.
 
 ---
 
@@ -10,7 +10,7 @@ The companies endpoint is the root of all Business Central API calls. It lists a
 GET {{BC_BASE_URL}}/companies
 ```
 
-> **Note:** This endpoint does NOT require a company ID — it is used to discover available companies and their IDs.
+> **Note:** This endpoint does NOT require a company name — it is used to discover available companies and their names.
 
 ---
 
@@ -129,4 +129,4 @@ GET {{BC_BASE_URL}}/companies?$orderby=name asc
 |--------|------------------------|------------------------------------------------------------------------------------|
 | `401`  | Unauthorized           | Access token is missing, expired, or invalid. Request a new token.                 |
 | `403`  | Forbidden              | The app registration does not have permission to access BC. Check API permissions.  |
-| `404`  | Not Found              | The company ID does not exist. Verify the GUID is correct.                         |
+| `404`  | Not Found              | The company name does not match any company. Verify the name is correct.           |

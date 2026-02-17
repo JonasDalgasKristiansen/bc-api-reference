@@ -160,6 +160,6 @@ When updating company information with PATCH, you **must** include the `If-Match
 | Status | Error                  | Cause & Resolution                                                                 |
 |--------|------------------------|------------------------------------------------------------------------------------|
 | `401`  | Unauthorized           | Access token is missing, expired, or invalid. Request a new token.                 |
-| `404`  | Not Found              | The company ID is incorrect or the company does not exist.                         |
+| `404`  | Not Found              | The company name is incorrect or the company does not exist.                       |
 | `400`  | Bad Request            | The request body contains invalid field values. Check field types and formats.     |
 | `409`  | Conflict               | ETag mismatch — the record was modified since your last GET. Fetch and retry.      |

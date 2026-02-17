@@ -108,9 +108,9 @@ Business Central API uses **OAuth2 Client Credentials** flow. Follow these steps
    - More granular sets like `D365 READ`, `D365 BUS FULL ACCESS`, etc.
 8. Click **OK** / close the page
 
-### Step 5: Get Your Company ID
+### Step 5: Find Your Company Name
 
-After completing steps 1–4, make this API call:
+After completing steps 1–4, you can verify your company name with this API call:
 
 ```http
 GET {{BC_BASE_URL}}/companies
@@ -183,11 +183,11 @@ Automation API: {{BC_AUTOMATION_URL}}/companies(name='{{BC_COMPANY_NAME}}')/{{en
 **Expanded examples:**
 
 ```
-GET https://api.businesscentral.dynamics.com/v2.0/{tenant}/{environment}/api/v2.0/companies({companyId})/customers
-GET https://api.businesscentral.dynamics.com/v2.0/{tenant}/{environment}/api/microsoft/automation/v2.0/companies({companyId})/users
+GET https://api.businesscentral.dynamics.com/v2.0/{tenant}/{environment}/api/v2.0/companies(name='{companyName}')/customers
+GET https://api.businesscentral.dynamics.com/v2.0/{tenant}/{environment}/api/microsoft/automation/v2.0/companies(name='{companyName}')/users
 ```
 
-The only root-level endpoint (no company ID required):
+The only root-level endpoint (no company name required):
 
 ```
 GET {{BC_BASE_URL}}/companies

@@ -44,67 +44,67 @@ Tokens expire after 1 hour. Cache and refresh automatically. See [README.md](../
 
 | Category   | Resource                   | Endpoint Path                                                         | Methods                    | Notes                             |
 |------------|----------------------------|-----------------------------------------------------------------------|----------------------------|-----------------------------------|
-| Company    | companies                  | `/companies`                                                          | GET                        | Root-level, no company ID needed  |
-| Company    | companyInformation         | `/companies({id})/companyInformation`                                 | GET, PATCH                 | Single record per company         |
-| Customers  | customers                  | `/companies({id})/customers`                                          | GET, POST, PATCH, DELETE   |                                   |
-| Customers  | customerFinancialDetails   | `/companies({id})/customers({custId})/customerFinancialDetails`       | GET                        | Read-only, expand from customers  |
-| Customers  | customers/defaultDimensions| `/companies({id})/customers({custId})/defaultDimensions`              | GET, POST, PATCH, DELETE   | Sub-resource                      |
-| Customers  | customers/picture          | `/companies({id})/customers({custId})/picture`                        | GET, PATCH, DELETE         | Binary image data                 |
-| Customers  | customerPaymentJournals    | `/companies({id})/customerPaymentJournals`                            | GET, POST, PATCH, DELETE   |                                   |
-| Customers  | customerPaymentJournalLines| `/companies({id})/customerPaymentJournals({jId})/customerPaymentJournalLines` | GET, POST, PATCH, DELETE |                              |
-| Vendors    | vendors                    | `/companies({id})/vendors`                                            | GET, POST, PATCH, DELETE   |                                   |
-| Vendors    | vendors/defaultDimensions  | `/companies({id})/vendors({vendId})/defaultDimensions`                | GET, POST, PATCH, DELETE   | Sub-resource                      |
-| Vendors    | vendors/picture            | `/companies({id})/vendors({vendId})/picture`                          | GET, PATCH, DELETE         | Binary image data                 |
-| Items      | items                      | `/companies({id})/items`                                              | GET, POST, PATCH, DELETE   |                                   |
-| Items      | items/defaultDimensions    | `/companies({id})/items({itemId})/defaultDimensions`                  | GET, POST, PATCH, DELETE   | Sub-resource                      |
-| Items      | items/picture              | `/companies({id})/items({itemId})/picture`                            | GET, PATCH, DELETE         | Binary image data                 |
-| Items      | itemInventory              | `/companies({id})/items({itemId})/itemInventory`                      | GET                        | Read-only inventory levels        |
-| Items      | itemCategories             | `/companies({id})/itemCategories`                                     | GET, POST, PATCH, DELETE   |                                   |
-| Items      | locations                  | `/companies({id})/locations`                                          | GET, POST, PATCH, DELETE   |                                   |
-| Sales      | salesQuotes                | `/companies({id})/salesQuotes`                                        | GET, POST, PATCH, DELETE   | Actions: makeInvoice, makeOrder, send |
-| Sales      | salesQuoteLines            | `/companies({id})/salesQuotes({sqId})/salesQuoteLines`                | GET, POST, PATCH, DELETE   |                                   |
-| Sales      | salesOrders                | `/companies({id})/salesOrders`                                        | GET, POST, PATCH, DELETE   | Action: shipAndInvoice            |
-| Sales      | salesOrderLines            | `/companies({id})/salesOrders({soId})/salesOrderLines`                | GET, POST, PATCH, DELETE   |                                   |
-| Sales      | salesInvoices              | `/companies({id})/salesInvoices`                                      | GET, POST, PATCH, DELETE   | Actions: post, send, cancelAndSend|
-| Sales      | salesInvoiceLines          | `/companies({id})/salesInvoices({siId})/salesInvoiceLines`            | GET, POST, PATCH, DELETE   |                                   |
-| Sales      | salesCreditMemos           | `/companies({id})/salesCreditMemos`                                   | GET, POST, PATCH, DELETE   | Actions: post, send               |
-| Sales      | salesCreditMemoLines       | `/companies({id})/salesCreditMemos({scmId})/salesCreditMemoLines`     | GET, POST, PATCH, DELETE   |                                   |
-| Sales      | salesShipments             | `/companies({id})/salesShipments`                                     | GET                        | Read-only                         |
-| Sales      | salesShipmentLines         | `/companies({id})/salesShipments({ssId})/salesShipmentLines`          | GET                        | Read-only                         |
-| Purchase   | purchaseOrders             | `/companies({id})/purchaseOrders`                                     | GET, POST, PATCH, DELETE   | Actions: receive, receiveAndInvoice |
-| Purchase   | purchaseOrderLines         | `/companies({id})/purchaseOrders({poId})/purchaseOrderLines`          | GET, POST, PATCH, DELETE   |                                   |
-| Purchase   | purchaseInvoices           | `/companies({id})/purchaseInvoices`                                   | GET, POST, PATCH, DELETE   | Action: post                      |
-| Purchase   | purchaseInvoiceLines       | `/companies({id})/purchaseInvoices({piId})/purchaseInvoiceLines`      | GET, POST, PATCH, DELETE   |                                   |
-| Purchase   | purchaseReceipts           | `/companies({id})/purchaseReceipts`                                   | GET                        | Read-only                         |
-| Purchase   | purchaseReceiptLines       | `/companies({id})/purchaseReceipts({prId})/purchaseReceiptLines`      | GET                        | Read-only                         |
-| Finance    | accounts                   | `/companies({id})/accounts`                                           | GET, POST, PATCH, DELETE   | G/L Accounts                      |
-| Finance    | generalLedgerEntries       | `/companies({id})/generalLedgerEntries`                               | GET                        | Read-only                         |
-| Finance    | journals                   | `/companies({id})/journals`                                           | GET, POST, PATCH, DELETE   | Action: post                      |
-| Finance    | journalLines               | `/companies({id})/journals({jId})/journalLines`                       | GET, POST, PATCH, DELETE   |                                   |
-| Finance    | bankAccounts               | `/companies({id})/bankAccounts`                                       | GET, POST, PATCH, DELETE   |                                   |
-| Setup      | currencies                 | `/companies({id})/currencies`                                         | GET, POST, PATCH, DELETE   |                                   |
-| Setup      | paymentTerms               | `/companies({id})/paymentTerms`                                       | GET, POST, PATCH, DELETE   |                                   |
-| Setup      | paymentMethods             | `/companies({id})/paymentMethods`                                     | GET, POST, PATCH, DELETE   |                                   |
-| Setup      | shipmentMethods            | `/companies({id})/shipmentMethods`                                    | GET, POST, PATCH, DELETE   |                                   |
-| Setup      | unitsOfMeasure             | `/companies({id})/unitsOfMeasure`                                     | GET, POST, PATCH, DELETE   |                                   |
-| Setup      | dimensions                 | `/companies({id})/dimensions`                                         | GET                        | Typically read-only               |
-| Setup      | dimensionValues            | `/companies({id})/dimensions({dimId})/dimensionValues`                | GET                        | Sub-resource                      |
-| Setup      | taxAreas                   | `/companies({id})/taxAreas`                                           | GET, POST, PATCH, DELETE   |                                   |
-| Setup      | taxGroups                  | `/companies({id})/taxGroups`                                          | GET, POST, PATCH, DELETE   |                                   |
-| Employees  | employees                  | `/companies({id})/employees`                                          | GET, POST, PATCH, DELETE   |                                   |
-| Employees  | employees/defaultDimensions| `/companies({id})/employees({empId})/defaultDimensions`               | GET, POST, PATCH, DELETE   | Sub-resource                      |
-| Employees  | employees/picture          | `/companies({id})/employees({empId})/picture`                         | GET, PATCH, DELETE         | Binary image data                 |
-| Webhooks   | subscriptions              | `/subscriptions`                                                      | GET, POST, PATCH, DELETE   | No company ID in path             |
+| Company    | companies                  | `/companies`                                                          | GET                        | Root-level, no company name needed  |
+| Company    | companyInformation         | `/companies(name='{{BC_COMPANY_NAME}}')/companyInformation`                                 | GET, PATCH                 | Single record per company         |
+| Customers  | customers                  | `/companies(name='{{BC_COMPANY_NAME}}')/customers`                                          | GET, POST, PATCH, DELETE   |                                   |
+| Customers  | customerFinancialDetails   | `/companies(name='{{BC_COMPANY_NAME}}')/customers({custId})/customerFinancialDetails`       | GET                        | Read-only, expand from customers  |
+| Customers  | customers/defaultDimensions| `/companies(name='{{BC_COMPANY_NAME}}')/customers({custId})/defaultDimensions`              | GET, POST, PATCH, DELETE   | Sub-resource                      |
+| Customers  | customers/picture          | `/companies(name='{{BC_COMPANY_NAME}}')/customers({custId})/picture`                        | GET, PATCH, DELETE         | Binary image data                 |
+| Customers  | customerPaymentJournals    | `/companies(name='{{BC_COMPANY_NAME}}')/customerPaymentJournals`                            | GET, POST, PATCH, DELETE   |                                   |
+| Customers  | customerPaymentJournalLines| `/companies(name='{{BC_COMPANY_NAME}}')/customerPaymentJournals({jId})/customerPaymentJournalLines` | GET, POST, PATCH, DELETE |                              |
+| Vendors    | vendors                    | `/companies(name='{{BC_COMPANY_NAME}}')/vendors`                                            | GET, POST, PATCH, DELETE   |                                   |
+| Vendors    | vendors/defaultDimensions  | `/companies(name='{{BC_COMPANY_NAME}}')/vendors({vendId})/defaultDimensions`                | GET, POST, PATCH, DELETE   | Sub-resource                      |
+| Vendors    | vendors/picture            | `/companies(name='{{BC_COMPANY_NAME}}')/vendors({vendId})/picture`                          | GET, PATCH, DELETE         | Binary image data                 |
+| Items      | items                      | `/companies(name='{{BC_COMPANY_NAME}}')/items`                                              | GET, POST, PATCH, DELETE   |                                   |
+| Items      | items/defaultDimensions    | `/companies(name='{{BC_COMPANY_NAME}}')/items({itemId})/defaultDimensions`                  | GET, POST, PATCH, DELETE   | Sub-resource                      |
+| Items      | items/picture              | `/companies(name='{{BC_COMPANY_NAME}}')/items({itemId})/picture`                            | GET, PATCH, DELETE         | Binary image data                 |
+| Items      | itemInventory              | `/companies(name='{{BC_COMPANY_NAME}}')/items({itemId})/itemInventory`                      | GET                        | Read-only inventory levels        |
+| Items      | itemCategories             | `/companies(name='{{BC_COMPANY_NAME}}')/itemCategories`                                     | GET, POST, PATCH, DELETE   |                                   |
+| Items      | locations                  | `/companies(name='{{BC_COMPANY_NAME}}')/locations`                                          | GET, POST, PATCH, DELETE   |                                   |
+| Sales      | salesQuotes                | `/companies(name='{{BC_COMPANY_NAME}}')/salesQuotes`                                        | GET, POST, PATCH, DELETE   | Actions: makeInvoice, makeOrder, send |
+| Sales      | salesQuoteLines            | `/companies(name='{{BC_COMPANY_NAME}}')/salesQuotes({sqId})/salesQuoteLines`                | GET, POST, PATCH, DELETE   |                                   |
+| Sales      | salesOrders                | `/companies(name='{{BC_COMPANY_NAME}}')/salesOrders`                                        | GET, POST, PATCH, DELETE   | Action: shipAndInvoice            |
+| Sales      | salesOrderLines            | `/companies(name='{{BC_COMPANY_NAME}}')/salesOrders({soId})/salesOrderLines`                | GET, POST, PATCH, DELETE   |                                   |
+| Sales      | salesInvoices              | `/companies(name='{{BC_COMPANY_NAME}}')/salesInvoices`                                      | GET, POST, PATCH, DELETE   | Actions: post, send, cancelAndSend|
+| Sales      | salesInvoiceLines          | `/companies(name='{{BC_COMPANY_NAME}}')/salesInvoices({siId})/salesInvoiceLines`            | GET, POST, PATCH, DELETE   |                                   |
+| Sales      | salesCreditMemos           | `/companies(name='{{BC_COMPANY_NAME}}')/salesCreditMemos`                                   | GET, POST, PATCH, DELETE   | Actions: post, send               |
+| Sales      | salesCreditMemoLines       | `/companies(name='{{BC_COMPANY_NAME}}')/salesCreditMemos({scmId})/salesCreditMemoLines`     | GET, POST, PATCH, DELETE   |                                   |
+| Sales      | salesShipments             | `/companies(name='{{BC_COMPANY_NAME}}')/salesShipments`                                     | GET                        | Read-only                         |
+| Sales      | salesShipmentLines         | `/companies(name='{{BC_COMPANY_NAME}}')/salesShipments({ssId})/salesShipmentLines`          | GET                        | Read-only                         |
+| Purchase   | purchaseOrders             | `/companies(name='{{BC_COMPANY_NAME}}')/purchaseOrders`                                     | GET, POST, PATCH, DELETE   | Actions: receive, receiveAndInvoice |
+| Purchase   | purchaseOrderLines         | `/companies(name='{{BC_COMPANY_NAME}}')/purchaseOrders({poId})/purchaseOrderLines`          | GET, POST, PATCH, DELETE   |                                   |
+| Purchase   | purchaseInvoices           | `/companies(name='{{BC_COMPANY_NAME}}')/purchaseInvoices`                                   | GET, POST, PATCH, DELETE   | Action: post                      |
+| Purchase   | purchaseInvoiceLines       | `/companies(name='{{BC_COMPANY_NAME}}')/purchaseInvoices({piId})/purchaseInvoiceLines`      | GET, POST, PATCH, DELETE   |                                   |
+| Purchase   | purchaseReceipts           | `/companies(name='{{BC_COMPANY_NAME}}')/purchaseReceipts`                                   | GET                        | Read-only                         |
+| Purchase   | purchaseReceiptLines       | `/companies(name='{{BC_COMPANY_NAME}}')/purchaseReceipts({prId})/purchaseReceiptLines`      | GET                        | Read-only                         |
+| Finance    | accounts                   | `/companies(name='{{BC_COMPANY_NAME}}')/accounts`                                           | GET, POST, PATCH, DELETE   | G/L Accounts                      |
+| Finance    | generalLedgerEntries       | `/companies(name='{{BC_COMPANY_NAME}}')/generalLedgerEntries`                               | GET                        | Read-only                         |
+| Finance    | journals                   | `/companies(name='{{BC_COMPANY_NAME}}')/journals`                                           | GET, POST, PATCH, DELETE   | Action: post                      |
+| Finance    | journalLines               | `/companies(name='{{BC_COMPANY_NAME}}')/journals({jId})/journalLines`                       | GET, POST, PATCH, DELETE   |                                   |
+| Finance    | bankAccounts               | `/companies(name='{{BC_COMPANY_NAME}}')/bankAccounts`                                       | GET, POST, PATCH, DELETE   |                                   |
+| Setup      | currencies                 | `/companies(name='{{BC_COMPANY_NAME}}')/currencies`                                         | GET, POST, PATCH, DELETE   |                                   |
+| Setup      | paymentTerms               | `/companies(name='{{BC_COMPANY_NAME}}')/paymentTerms`                                       | GET, POST, PATCH, DELETE   |                                   |
+| Setup      | paymentMethods             | `/companies(name='{{BC_COMPANY_NAME}}')/paymentMethods`                                     | GET, POST, PATCH, DELETE   |                                   |
+| Setup      | shipmentMethods            | `/companies(name='{{BC_COMPANY_NAME}}')/shipmentMethods`                                    | GET, POST, PATCH, DELETE   |                                   |
+| Setup      | unitsOfMeasure             | `/companies(name='{{BC_COMPANY_NAME}}')/unitsOfMeasure`                                     | GET, POST, PATCH, DELETE   |                                   |
+| Setup      | dimensions                 | `/companies(name='{{BC_COMPANY_NAME}}')/dimensions`                                         | GET                        | Typically read-only               |
+| Setup      | dimensionValues            | `/companies(name='{{BC_COMPANY_NAME}}')/dimensions({dimId})/dimensionValues`                | GET                        | Sub-resource                      |
+| Setup      | taxAreas                   | `/companies(name='{{BC_COMPANY_NAME}}')/taxAreas`                                           | GET, POST, PATCH, DELETE   |                                   |
+| Setup      | taxGroups                  | `/companies(name='{{BC_COMPANY_NAME}}')/taxGroups`                                          | GET, POST, PATCH, DELETE   |                                   |
+| Employees  | employees                  | `/companies(name='{{BC_COMPANY_NAME}}')/employees`                                          | GET, POST, PATCH, DELETE   |                                   |
+| Employees  | employees/defaultDimensions| `/companies(name='{{BC_COMPANY_NAME}}')/employees({empId})/defaultDimensions`               | GET, POST, PATCH, DELETE   | Sub-resource                      |
+| Employees  | employees/picture          | `/companies(name='{{BC_COMPANY_NAME}}')/employees({empId})/picture`                         | GET, PATCH, DELETE         | Binary image data                 |
+| Webhooks   | subscriptions              | `/subscriptions`                                                      | GET, POST, PATCH, DELETE   | No company context in path        |
 
 ### Automation API — `{{BC_AUTOMATION_URL}}`
 
 | Category    | Resource          | Endpoint Path                                          | Methods                    | Notes                                  |
 |-------------|-------------------|--------------------------------------------------------|----------------------------|----------------------------------------|
 | Companies   | companies         | `/companies`                                           | GET, POST, PATCH, DELETE   | Manage BC companies                    |
-| Users       | users             | `/companies({id})/users`                               | GET, PATCH                 | Action: invite                         |
-| Users       | userPermissions   | `/companies({id})/users({userId})/userPermissions`     | GET, POST, DELETE          | Manage permission sets                 |
-| Users       | userGroupMembers  | `/companies({id})/users({userId})/userGroupMembers`    | GET, POST, DELETE          | Manage group membership                |
-| Extensions  | extensions        | `/companies({id})/extensions`                          | GET                        | Actions: install, uninstall, upload     |
+| Users       | users             | `/companies(name='{{BC_COMPANY_NAME}}')/users`                               | GET, PATCH                 | Action: invite                         |
+| Users       | userPermissions   | `/companies(name='{{BC_COMPANY_NAME}}')/users({userId})/userPermissions`     | GET, POST, DELETE          | Manage permission sets                 |
+| Users       | userGroupMembers  | `/companies(name='{{BC_COMPANY_NAME}}')/users({userId})/userGroupMembers`    | GET, POST, DELETE          | Manage group membership                |
+| Extensions  | extensions        | `/companies(name='{{BC_COMPANY_NAME}}')/extensions`                          | GET                        | Actions: install, uninstall, upload     |
 
 ### Admin Center API — `https://api.businesscentral.dynamics.com/admin/v2.28`
 
