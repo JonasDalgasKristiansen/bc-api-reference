@@ -7,7 +7,7 @@ General ledger (G/L) accounts represent the chart of accounts in Business Centra
 ## Base Endpoint
 
 ```
-{{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/accounts
+{{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/accounts
 ```
 
 ---
@@ -17,7 +17,7 @@ General ledger (G/L) accounts represent the chart of accounts in Business Centra
 ### 1. List All Accounts
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/accounts
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/accounts
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -109,7 +109,7 @@ Accept: application/json
 ### 2. Get a Single Account
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/accounts(a1b2c3d4-e5f6-7890-abcd-111111111111)
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/accounts(a1b2c3d4-e5f6-7890-abcd-111111111111)
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -150,19 +150,19 @@ Accept: application/json
 
 ```http
 # All income accounts
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/accounts?$filter=category eq 'Income'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/accounts?$filter=category eq 'Income'
 
 # Posting accounts only (exclude headings/totals)
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/accounts?$filter=accountType eq 'Posting'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/accounts?$filter=accountType eq 'Posting'
 
 # Active accounts that allow direct posting
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/accounts?$filter=blocked eq false and directPosting eq true
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/accounts?$filter=blocked eq false and directPosting eq true
 
 # Accounts starting with "1" (assets)
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/accounts?$filter=startswith(number, '1')
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/accounts?$filter=startswith(number, '1')
 
 # Search by name
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/accounts?$filter=contains(displayName, 'Cash')
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/accounts?$filter=contains(displayName, 'Cash')
 ```
 
 ---

@@ -42,7 +42,7 @@ It is designed for two audiences:
    - `BC_CLIENT_ID` — your app registration client ID
    - `BC_CLIENT_SECRET` — your app registration client secret
    - `BC_ENVIRONMENT` — `Production` or `Sandbox`
-   - `BC_COMPANY_ID` — the GUID of your BC company
+   - `BC_COMPANY_NAME` — your BC company display name (e.g. `CRONUS Danmark A/S`)
 4. Prompt the AI to build your feature — it will read the API reference from this repo and use your secrets for auth
 
 ### For local development
@@ -132,7 +132,8 @@ Response:
 }
 ```
 
-Copy the `id` value of the company you want to work with — this is your `BC_COMPANY_ID`.
+You can use the `displayName` value directly as your `BC_COMPANY_NAME` secret.
+The API uses it in URLs like: `companies(name='My Company Name')`.
 
 ---
 
@@ -175,8 +176,8 @@ grant_type=client_credentials
 All API calls follow these patterns:
 
 ```
-Standard API:   {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/{{endpoint}}
-Automation API: {{BC_AUTOMATION_URL}}/companies({{BC_COMPANY_ID}})/{{endpoint}}
+Standard API:   {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/{{endpoint}}
+Automation API: {{BC_AUTOMATION_URL}}/companies(name='{{BC_COMPANY_NAME}}')/{{endpoint}}
 ```
 
 **Expanded examples:**
@@ -259,7 +260,7 @@ Bound actions are **POST calls** that trigger business logic in Business Central
 **Usage pattern:**
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/{{resource}}({{id}})/Microsoft.NAV.{{action}}
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/{{resource}}({{id}})/Microsoft.NAV.{{action}}
 Authorization: Bearer {access_token}
 ```
 
@@ -327,7 +328,7 @@ When more results are available, the response includes an `@odata.nextLink` prop
 **Example pagination logic (pseudocode):**
 
 ```
-url = "{{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers?$top=50"
+url = "{{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers?$top=50"
 allRecords = []
 
 while url is not null:

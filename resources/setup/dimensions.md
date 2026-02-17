@@ -7,7 +7,7 @@ Dimensions are analysis codes used to tag transactions for reporting and analysi
 ## Base Endpoint
 
 ```
-{{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/dimensions
+{{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/dimensions
 ```
 
 ---
@@ -17,7 +17,7 @@ Dimensions are analysis codes used to tag transactions for reporting and analysi
 ### 1. List All Dimensions
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/dimensions
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/dimensions
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -57,7 +57,7 @@ Accept: application/json
 ### 2. Get a Single Dimension
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/dimensions(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/dimensions(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
 Authorization: Bearer {access_token}
 ```
 
@@ -81,7 +81,7 @@ Authorization: Bearer {access_token}
 ### List Dimension Values
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/dimensions(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)/dimensionValues
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/dimensions(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)/dimensionValues
 Authorization: Bearer {access_token}
 ```
 
@@ -118,7 +118,7 @@ Authorization: Bearer {access_token}
 ### Get a Single Dimension Value
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/dimensions(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)/dimensionValues(d4d4d4d4-4444-4444-4444-dddddddddddd)
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/dimensions(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)/dimensionValues(d4d4d4d4-4444-4444-4444-dddddddddddd)
 ```
 
 ---
@@ -144,25 +144,25 @@ Default dimensions can be assigned to master records. When a transaction is crea
 ### For Customers
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers({customerId})/defaultDimensions
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers({customerId})/defaultDimensions
 ```
 
 ### For Vendors
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/vendors({vendorId})/defaultDimensions
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/vendors({vendorId})/defaultDimensions
 ```
 
 ### For Items
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/items({itemId})/defaultDimensions
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/items({itemId})/defaultDimensions
 ```
 
 ### For G/L Accounts
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/accounts({accountId})/defaultDimensions
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/accounts({accountId})/defaultDimensions
 ```
 
 ### Default Dimension Response Example
@@ -186,7 +186,7 @@ GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/accounts({accountId})/defaultDi
 ### Create a Default Dimension
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers({customerId})/defaultDimensions
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers({customerId})/defaultDimensions
 Authorization: Bearer {access_token}
 Content-Type: application/json
 ```
@@ -202,7 +202,7 @@ Content-Type: application/json
 ### Update a Default Dimension
 
 ```http
-PATCH {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers({customerId})/defaultDimensions({dimensionId})
+PATCH {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers({customerId})/defaultDimensions({dimensionId})
 Authorization: Bearer {access_token}
 Content-Type: application/json
 If-Match: W/"JzE5O0REMTsn"
@@ -218,7 +218,7 @@ If-Match: W/"JzE5O0REMTsn"
 ### Delete a Default Dimension
 
 ```http
-DELETE {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers({customerId})/defaultDimensions({dimensionId})
+DELETE {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers({customerId})/defaultDimensions({dimensionId})
 Authorization: Bearer {access_token}
 If-Match: W/"JzE5O0REMTsn"
 ```
@@ -253,10 +253,10 @@ If-Match: W/"JzE5O0REMTsn"
 
 ```http
 # Get all dimension values for the DEPARTMENT dimension
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/dimensions?$filter=code eq 'DEPARTMENT'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/dimensions?$filter=code eq 'DEPARTMENT'
 
 # Get default dimensions for a specific customer (expand dimension values)
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers({customerId})/defaultDimensions
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers({customerId})/defaultDimensions
 ```
 
 ---

@@ -7,7 +7,7 @@ Customers represent the people or organizations that purchase goods and services
 ## Base Endpoint
 
 ```
-{{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers
+{{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers
 ```
 
 ---
@@ -17,7 +17,7 @@ Customers represent the people or organizations that purchase goods and services
 ### 1. List All Customers
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -97,7 +97,7 @@ Accept: application/json
 ### 2. Get a Single Customer
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers(d1e2f3a4-b5c6-7890-1234-567890abcdef)
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers(d1e2f3a4-b5c6-7890-1234-567890abcdef)
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -109,7 +109,7 @@ Accept: application/json
 ### 3. Create a Customer
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers
 Authorization: Bearer {access_token}
 Content-Type: application/json
 ```
@@ -178,7 +178,7 @@ Content-Type: application/json
 ### 4. Update a Customer
 
 ```http
-PATCH {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers(d1e2f3a4-b5c6-7890-1234-567890abcdef)
+PATCH {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers(d1e2f3a4-b5c6-7890-1234-567890abcdef)
 Authorization: Bearer {access_token}
 Content-Type: application/json
 If-Match: W/"JzE5OzEyMzQ1Njc4OTA7REFWSUQ7Jw=="
@@ -201,7 +201,7 @@ If-Match: W/"JzE5OzEyMzQ1Njc4OTA7REFWSUQ7Jw=="
 ### 5. Delete a Customer
 
 ```http
-DELETE {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers(d1e2f3a4-b5c6-7890-1234-567890abcdef)
+DELETE {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers(d1e2f3a4-b5c6-7890-1234-567890abcdef)
 Authorization: Bearer {access_token}
 If-Match: W/"JzE5OzEyMzQ1Njc4OTA7REFWSUQ7Jw=="
 ```
@@ -250,28 +250,28 @@ Use `$expand` to include related entities in the response:
 
 ```http
 # Financial details (balance breakdown, credit limit, etc.)
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers?$expand=customerFinancialDetails
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers?$expand=customerFinancialDetails
 
 # Default dimensions assigned to the customer
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers?$expand=defaultDimensions
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers?$expand=defaultDimensions
 
 # Customer picture / logo
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers?$expand=picture
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers?$expand=picture
 
 # Related currency record
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers?$expand=currency
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers?$expand=currency
 
 # Related payment terms record
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers?$expand=paymentTerm
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers?$expand=paymentTerm
 
 # Related shipment method record
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers?$expand=shipmentMethod
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers?$expand=shipmentMethod
 
 # Related payment method record
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers?$expand=paymentMethod
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers?$expand=paymentMethod
 
 # Multiple expands
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers?$expand=customerFinancialDetails,defaultDimensions,currency
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers?$expand=customerFinancialDetails,defaultDimensions,currency
 ```
 
 ---
@@ -280,31 +280,31 @@ GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers?$expand=customerFinan
 
 ```http
 # Only non-blocked customers
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers?$filter=blocked eq ' '
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers?$filter=blocked eq ' '
 
 # Customers with outstanding balance
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers?$filter=balance gt 0
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers?$filter=balance gt 0
 
 # Customers with overdue amounts
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers?$filter=overdueAmount gt 0
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers?$filter=overdueAmount gt 0
 
 # Recently modified customers
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers?$filter=lastModifiedDateTime gt 2024-01-01T00:00:00Z
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers?$filter=lastModifiedDateTime gt 2024-01-01T00:00:00Z
 
 # Search by name (contains)
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers?$filter=contains(displayName,'Corp')
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers?$filter=contains(displayName,'Corp')
 
 # Search by exact name
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers?$filter=displayName eq 'Adatum Corporation'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers?$filter=displayName eq 'Adatum Corporation'
 
 # Filter by currency
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers?$filter=currencyCode eq 'USD'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers?$filter=currencyCode eq 'USD'
 
 # Filter by type
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers?$filter=type eq 'Company'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers?$filter=type eq 'Company'
 
 # Combined: non-blocked with balance, sorted by balance descending, top 20
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customers?$filter=blocked eq ' ' and balance gt 0&$orderby=balance desc&$top=20&$select=number,displayName,balance,overdueAmount
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers?$filter=blocked eq ' ' and balance gt 0&$orderby=balance desc&$top=20&$select=number,displayName,balance,overdueAmount
 ```
 
 ---

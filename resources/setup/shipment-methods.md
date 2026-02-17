@@ -7,7 +7,7 @@ Shipment methods define how goods are shipped to customers or received from vend
 ## Base Endpoint
 
 ```
-{{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/shipmentMethods
+{{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/shipmentMethods
 ```
 
 ---
@@ -17,7 +17,7 @@ Shipment methods define how goods are shipped to customers or received from vend
 ### 1. List All Shipment Methods
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/shipmentMethods
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/shipmentMethods
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -64,7 +64,7 @@ Accept: application/json
 ### 2. Get a Single Shipment Method
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/shipmentMethods(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/shipmentMethods(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
 Authorization: Bearer {access_token}
 ```
 
@@ -73,7 +73,7 @@ Authorization: Bearer {access_token}
 ### 3. Create a Shipment Method
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/shipmentMethods
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/shipmentMethods
 Authorization: Bearer {access_token}
 Content-Type: application/json
 ```
@@ -90,7 +90,7 @@ Content-Type: application/json
 ### 4. Update a Shipment Method
 
 ```http
-PATCH {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/shipmentMethods(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
+PATCH {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/shipmentMethods(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
 Authorization: Bearer {access_token}
 Content-Type: application/json
 If-Match: W/"JzE5O1NNMTsn"
@@ -107,7 +107,7 @@ If-Match: W/"JzE5O1NNMTsn"
 ### 5. Delete a Shipment Method
 
 ```http
-DELETE {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/shipmentMethods(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
+DELETE {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/shipmentMethods(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
 Authorization: Bearer {access_token}
 If-Match: W/"JzE5O1NNMTsn"
 ```

@@ -7,7 +7,7 @@ General journals allow you to create and post financial transactions directly to
 ## Base Endpoint
 
 ```
-{{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/journals
+{{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/journals
 ```
 
 ---
@@ -17,7 +17,7 @@ General journals allow you to create and post financial transactions directly to
 ### 1. List All Journals
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/journals
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/journals
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -57,7 +57,7 @@ Accept: application/json
 ### 2. Get a Single Journal
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/journals(a1a1a1a1-1111-2222-3333-aaaaaaaaaaaa)
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/journals(a1a1a1a1-1111-2222-3333-aaaaaaaaaaaa)
 Authorization: Bearer {access_token}
 ```
 
@@ -66,7 +66,7 @@ Authorization: Bearer {access_token}
 ### 3. Create a Journal
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/journals
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/journals
 Authorization: Bearer {access_token}
 Content-Type: application/json
 ```
@@ -86,7 +86,7 @@ Content-Type: application/json
 ### 4. Update a Journal
 
 ```http
-PATCH {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/journals(a1a1a1a1-1111-2222-3333-aaaaaaaaaaaa)
+PATCH {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/journals(a1a1a1a1-1111-2222-3333-aaaaaaaaaaaa)
 Authorization: Bearer {access_token}
 Content-Type: application/json
 If-Match: W/"JzE5OzExO0oxOyc="
@@ -103,7 +103,7 @@ If-Match: W/"JzE5OzExO0oxOyc="
 ### 5. Delete a Journal
 
 ```http
-DELETE {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/journals(a1a1a1a1-1111-2222-3333-aaaaaaaaaaaa)
+DELETE {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/journals(a1a1a1a1-1111-2222-3333-aaaaaaaaaaaa)
 Authorization: Bearer {access_token}
 If-Match: W/"JzE5OzExO0oxOyc="
 ```
@@ -131,7 +131,7 @@ If-Match: W/"JzE5OzExO0oxOyc="
 ### List Lines
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/journals(a1a1a1a1-1111-2222-3333-aaaaaaaaaaaa)/journalLines
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/journals(a1a1a1a1-1111-2222-3333-aaaaaaaaaaaa)/journalLines
 Authorization: Bearer {access_token}
 ```
 
@@ -189,7 +189,7 @@ Authorization: Bearer {access_token}
 ### Create a Journal Line
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/journals(a1a1a1a1-1111-2222-3333-aaaaaaaaaaaa)/journalLines
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/journals(a1a1a1a1-1111-2222-3333-aaaaaaaaaaaa)/journalLines
 Authorization: Bearer {access_token}
 Content-Type: application/json
 ```
@@ -212,7 +212,7 @@ Content-Type: application/json
 ### Update a Journal Line
 
 ```http
-PATCH {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/journals(a1a1a1a1-1111-2222-3333-aaaaaaaaaaaa)/journalLines(c3c3c3c3-7777-8888-9999-cccccccccccc)
+PATCH {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/journals(a1a1a1a1-1111-2222-3333-aaaaaaaaaaaa)/journalLines(c3c3c3c3-7777-8888-9999-cccccccccccc)
 Authorization: Bearer {access_token}
 Content-Type: application/json
 If-Match: W/"JzE5O0pMMTsn"
@@ -228,7 +228,7 @@ If-Match: W/"JzE5O0pMMTsn"
 ### Delete a Journal Line
 
 ```http
-DELETE {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/journals(a1a1a1a1-1111-2222-3333-aaaaaaaaaaaa)/journalLines(c3c3c3c3-7777-8888-9999-cccccccccccc)
+DELETE {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/journals(a1a1a1a1-1111-2222-3333-aaaaaaaaaaaa)/journalLines(c3c3c3c3-7777-8888-9999-cccccccccccc)
 Authorization: Bearer {access_token}
 If-Match: W/"JzE5O0pMMTsn"
 ```
@@ -265,7 +265,7 @@ If-Match: W/"JzE5O0pMMTsn"
 Post all lines in a journal batch:
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/journals(a1a1a1a1-1111-2222-3333-aaaaaaaaaaaa)/Microsoft.NAV.post
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/journals(a1a1a1a1-1111-2222-3333-aaaaaaaaaaaa)/Microsoft.NAV.post
 Authorization: Bearer {access_token}
 ```
 
@@ -282,7 +282,7 @@ Here is a complete end-to-end workflow for creating journal lines and posting th
 ### Step 1: Create journal lines
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/journals(a1a1a1a1-1111-2222-3333-aaaaaaaaaaaa)/journalLines
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/journals(a1a1a1a1-1111-2222-3333-aaaaaaaaaaaa)/journalLines
 Content-Type: application/json
 Authorization: Bearer {access_token}
 ```
@@ -303,7 +303,7 @@ Authorization: Bearer {access_token}
 ### Step 2: Post the journal
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/journals(a1a1a1a1-1111-2222-3333-aaaaaaaaaaaa)/Microsoft.NAV.post
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/journals(a1a1a1a1-1111-2222-3333-aaaaaaaaaaaa)/Microsoft.NAV.post
 Authorization: Bearer {access_token}
 ```
 

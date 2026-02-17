@@ -7,7 +7,7 @@ Purchase invoices represent bills received from vendors for goods or services. D
 ## Base Endpoint
 
 ```
-{{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseInvoices
+{{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseInvoices
 ```
 
 ---
@@ -29,7 +29,7 @@ Purchase invoices represent bills received from vendors for goods or services. D
 ### 1. List All Purchase Invoices
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseInvoices
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseInvoices
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -90,7 +90,7 @@ Accept: application/json
 ### 2. Get a Single Purchase Invoice
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseInvoices(a1a1a1a1-aaaa-bbbb-cccc-111111111111)
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseInvoices(a1a1a1a1-aaaa-bbbb-cccc-111111111111)
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -100,7 +100,7 @@ Accept: application/json
 ### 3. Create a Purchase Invoice (Draft)
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseInvoices
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseInvoices
 Authorization: Bearer {access_token}
 Content-Type: application/json
 ```
@@ -169,7 +169,7 @@ Content-Type: application/json
 ### 4. Update a Purchase Invoice
 
 ```http
-PATCH {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseInvoices(b2b2b2b2-bbbb-cccc-dddd-222222222222)
+PATCH {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseInvoices(b2b2b2b2-bbbb-cccc-dddd-222222222222)
 Authorization: Bearer {access_token}
 Content-Type: application/json
 If-Match: W/"JzIwOzIyO1BJMjsn"
@@ -189,7 +189,7 @@ If-Match: W/"JzIwOzIyO1BJMjsn"
 ### 5. Delete a Purchase Invoice
 
 ```http
-DELETE {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseInvoices(b2b2b2b2-bbbb-cccc-dddd-222222222222)
+DELETE {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseInvoices(b2b2b2b2-bbbb-cccc-dddd-222222222222)
 Authorization: Bearer {access_token}
 If-Match: W/"JzIwOzIyO1BJMjsn"
 ```
@@ -242,7 +242,7 @@ If-Match: W/"JzIwOzIyO1BJMjsn"
 ### List Lines
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseInvoices(a1a1a1a1-aaaa-bbbb-cccc-111111111111)/purchaseInvoiceLines
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseInvoices(a1a1a1a1-aaaa-bbbb-cccc-111111111111)/purchaseInvoiceLines
 Authorization: Bearer {access_token}
 ```
 
@@ -294,7 +294,7 @@ DELETE .../purchaseInvoices({id})/purchaseInvoiceLines({lineId})   (with If-Matc
 Post a draft purchase invoice:
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseInvoices(b2b2b2b2-bbbb-cccc-dddd-222222222222)/Microsoft.NAV.post
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseInvoices(b2b2b2b2-bbbb-cccc-dddd-222222222222)/Microsoft.NAV.post
 Authorization: Bearer {access_token}
 ```
 
@@ -308,16 +308,16 @@ After posting, the invoice status changes from `Draft` to `Open`, a posted invoi
 
 ```http
 # Draft invoices
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseInvoices?$filter=status eq 'Draft'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseInvoices?$filter=status eq 'Draft'
 
 # Open (posted, unpaid) invoices
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseInvoices?$filter=status eq 'Open'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseInvoices?$filter=status eq 'Open'
 
 # For a specific vendor
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseInvoices?$filter=vendorNumber eq '10000'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseInvoices?$filter=vendorNumber eq '10000'
 
 # High-value invoices
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseInvoices?$filter=totalAmountExcludingTax gt 5000
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseInvoices?$filter=totalAmountExcludingTax gt 5000
 ```
 
 ---

@@ -7,7 +7,7 @@ Payment methods define how payments are made (e.g., bank transfer, check, cash).
 ## Base Endpoint
 
 ```
-{{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/paymentMethods
+{{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/paymentMethods
 ```
 
 ---
@@ -17,7 +17,7 @@ Payment methods define how payments are made (e.g., bank transfer, check, cash).
 ### 1. List All Payment Methods
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/paymentMethods
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/paymentMethods
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -64,7 +64,7 @@ Accept: application/json
 ### 2. Get a Single Payment Method
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/paymentMethods(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/paymentMethods(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
 Authorization: Bearer {access_token}
 ```
 
@@ -73,7 +73,7 @@ Authorization: Bearer {access_token}
 ### 3. Create a Payment Method
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/paymentMethods
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/paymentMethods
 Authorization: Bearer {access_token}
 Content-Type: application/json
 ```
@@ -90,7 +90,7 @@ Content-Type: application/json
 ### 4. Update a Payment Method
 
 ```http
-PATCH {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/paymentMethods(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
+PATCH {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/paymentMethods(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
 Authorization: Bearer {access_token}
 Content-Type: application/json
 If-Match: W/"JzE5O1BNMTsn"
@@ -107,7 +107,7 @@ If-Match: W/"JzE5O1BNMTsn"
 ### 5. Delete a Payment Method
 
 ```http
-DELETE {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/paymentMethods(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
+DELETE {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/paymentMethods(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
 Authorization: Bearer {access_token}
 If-Match: W/"JzE5O1BNMTsn"
 ```

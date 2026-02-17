@@ -7,7 +7,7 @@ Units of measure define the measurement units used for items and resources in Bu
 ## Base Endpoint
 
 ```
-{{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/unitsOfMeasure
+{{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/unitsOfMeasure
 ```
 
 ---
@@ -17,7 +17,7 @@ Units of measure define the measurement units used for items and resources in Bu
 ### 1. List All Units of Measure
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/unitsOfMeasure
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/unitsOfMeasure
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -76,7 +76,7 @@ Accept: application/json
 ### 2. Get a Single Unit of Measure
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/unitsOfMeasure(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/unitsOfMeasure(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
 Authorization: Bearer {access_token}
 ```
 
@@ -85,7 +85,7 @@ Authorization: Bearer {access_token}
 ### 3. Create a Unit of Measure
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/unitsOfMeasure
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/unitsOfMeasure
 Authorization: Bearer {access_token}
 Content-Type: application/json
 ```
@@ -103,7 +103,7 @@ Content-Type: application/json
 ### 4. Update a Unit of Measure
 
 ```http
-PATCH {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/unitsOfMeasure(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
+PATCH {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/unitsOfMeasure(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
 Authorization: Bearer {access_token}
 Content-Type: application/json
 If-Match: W/"JzE5O1VPTTEn"
@@ -120,7 +120,7 @@ If-Match: W/"JzE5O1VPTTEn"
 ### 5. Delete a Unit of Measure
 
 ```http
-DELETE {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/unitsOfMeasure(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
+DELETE {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/unitsOfMeasure(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
 Authorization: Bearer {access_token}
 If-Match: W/"JzE5O1VPTTEn"
 ```

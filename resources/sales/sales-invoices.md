@@ -7,7 +7,7 @@ Sales invoices represent bills sent to customers for goods or services. Draft in
 ## Base Endpoint
 
 ```
-{{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesInvoices
+{{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesInvoices
 ```
 
 ---
@@ -30,7 +30,7 @@ Sales invoices represent bills sent to customers for goods or services. Draft in
 ### 1. List All Sales Invoices
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesInvoices
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesInvoices
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -124,7 +124,7 @@ Accept: application/json
 ### 2. Get a Single Sales Invoice
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesInvoices(a1a1a1a1-b1b1-c1c1-d1d1-e1e1e1e1e1e1)
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesInvoices(a1a1a1a1-b1b1-c1c1-d1d1-e1e1e1e1e1e1)
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -134,7 +134,7 @@ Accept: application/json
 ### 3. Create a Sales Invoice (Draft)
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesInvoices
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesInvoices
 Authorization: Bearer {access_token}
 Content-Type: application/json
 ```
@@ -201,7 +201,7 @@ Content-Type: application/json
 > **Note:** Only **Draft** invoices can be updated. Posted invoices are read-only.
 
 ```http
-PATCH {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesInvoices(b2b2b2b2-c2c2-d2d2-e2e2-f2f2f2f2f2f2)
+PATCH {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesInvoices(b2b2b2b2-c2c2-d2d2-e2e2-f2f2f2f2f2f2)
 Authorization: Bearer {access_token}
 Content-Type: application/json
 If-Match: W/"JzE5OzIyO1NJMjsn"
@@ -223,7 +223,7 @@ If-Match: W/"JzE5OzIyO1NJMjsn"
 > **Note:** Only **Draft** invoices can be deleted. Posted invoices cannot be deleted — use `cancelAndSend` instead.
 
 ```http
-DELETE {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesInvoices(b2b2b2b2-c2c2-d2d2-e2e2-f2f2f2f2f2f2)
+DELETE {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesInvoices(b2b2b2b2-c2c2-d2d2-e2e2-f2f2f2f2f2f2)
 Authorization: Bearer {access_token}
 If-Match: W/"JzE5OzIyO1NJMjsn"
 ```
@@ -278,7 +278,7 @@ If-Match: W/"JzE5OzIyO1NJMjsn"
 ### List Invoice Lines
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesInvoices(a1a1a1a1-b1b1-c1c1-d1d1-e1e1e1e1e1e1)/salesInvoiceLines
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesInvoices(a1a1a1a1-b1b1-c1c1-d1d1-e1e1e1e1e1e1)/salesInvoiceLines
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -324,7 +324,7 @@ Accept: application/json
 > Only works on **Draft** invoices.
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesInvoices(b2b2b2b2-c2c2-d2d2-e2e2-f2f2f2f2f2f2)/salesInvoiceLines
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesInvoices(b2b2b2b2-c2c2-d2d2-e2e2-f2f2f2f2f2f2)/salesInvoiceLines
 Authorization: Bearer {access_token}
 Content-Type: application/json
 ```
@@ -359,7 +359,7 @@ DELETE .../salesInvoices({id})/salesInvoiceLines({lineId})
 Transitions a Draft invoice to Open (posted):
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesInvoices(b2b2b2b2-c2c2-d2d2-e2e2-f2f2f2f2f2f2)/Microsoft.NAV.post
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesInvoices(b2b2b2b2-c2c2-d2d2-e2e2-f2f2f2f2f2f2)/Microsoft.NAV.post
 Authorization: Bearer {access_token}
 ```
 
@@ -370,7 +370,7 @@ After posting, the invoice status changes from `Draft` to `Open`, a posted invoi
 ### Send Invoice by Email
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesInvoices(a1a1a1a1-b1b1-c1c1-d1d1-e1e1e1e1e1e1)/Microsoft.NAV.send
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesInvoices(a1a1a1a1-b1b1-c1c1-d1d1-e1e1e1e1e1e1)/Microsoft.NAV.send
 Authorization: Bearer {access_token}
 ```
 
@@ -379,7 +379,7 @@ Authorization: Bearer {access_token}
 ### Cancel and Send Cancellation
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesInvoices(a1a1a1a1-b1b1-c1c1-d1d1-e1e1e1e1e1e1)/Microsoft.NAV.cancelAndSend
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesInvoices(a1a1a1a1-b1b1-c1c1-d1d1-e1e1e1e1e1e1)/Microsoft.NAV.cancelAndSend
 Authorization: Bearer {access_token}
 ```
 
@@ -391,28 +391,28 @@ Authorization: Bearer {access_token}
 
 ```http
 # Draft invoices only
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesInvoices?$filter=status eq 'Draft'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesInvoices?$filter=status eq 'Draft'
 
 # Open (posted, unpaid) invoices
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesInvoices?$filter=status eq 'Open'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesInvoices?$filter=status eq 'Open'
 
 # Paid invoices
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesInvoices?$filter=status eq 'Paid'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesInvoices?$filter=status eq 'Paid'
 
 # Invoices with remaining balance
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesInvoices?$filter=remainingAmount gt 0
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesInvoices?$filter=remainingAmount gt 0
 
 # Invoices for a specific customer
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesInvoices?$filter=customerNumber eq '10000'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesInvoices?$filter=customerNumber eq '10000'
 
 # Overdue invoices
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesInvoices?$filter=status eq 'Open' and dueDate lt 2025-02-17
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesInvoices?$filter=status eq 'Open' and dueDate lt 2025-02-17
 
 # Invoices with line details
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesInvoices?$expand=salesInvoiceLines&$filter=status eq 'Open'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesInvoices?$expand=salesInvoiceLines&$filter=status eq 'Open'
 
 # Combined: open invoices, key fields, sorted by due date
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesInvoices?$filter=status eq 'Open'&$select=number,customerName,invoiceDate,dueDate,totalAmountIncludingTax,remainingAmount&$orderby=dueDate asc
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesInvoices?$filter=status eq 'Open'&$select=number,customerName,invoiceDate,dueDate,totalAmountIncludingTax,remainingAmount&$orderby=dueDate asc
 ```
 
 ---

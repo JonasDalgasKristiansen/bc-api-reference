@@ -7,7 +7,7 @@ Sales credit memos are used to reverse or correct sales invoices. They can be cr
 ## Base Endpoint
 
 ```
-{{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesCreditMemos
+{{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesCreditMemos
 ```
 
 ---
@@ -17,7 +17,7 @@ Sales credit memos are used to reverse or correct sales invoices. They can be cr
 ### 1. List All Sales Credit Memos
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesCreditMemos
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesCreditMemos
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -72,7 +72,7 @@ Accept: application/json
 ### 2. Get a Single Sales Credit Memo
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesCreditMemos(a1b1c1d1-1111-2222-3333-444444444444)
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesCreditMemos(a1b1c1d1-1111-2222-3333-444444444444)
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -82,7 +82,7 @@ Accept: application/json
 ### 3. Create a Sales Credit Memo
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesCreditMemos
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesCreditMemos
 Authorization: Bearer {access_token}
 Content-Type: application/json
 ```
@@ -144,7 +144,7 @@ Content-Type: application/json
 ### 4. Update a Sales Credit Memo
 
 ```http
-PATCH {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesCreditMemos(b2c2d2e2-2222-3333-4444-555555555555)
+PATCH {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesCreditMemos(b2c2d2e2-2222-3333-4444-555555555555)
 Authorization: Bearer {access_token}
 Content-Type: application/json
 If-Match: W/"JzIwOzIyO1NDTTI7Jw=="
@@ -163,7 +163,7 @@ If-Match: W/"JzIwOzIyO1NDTTI7Jw=="
 ### 5. Delete a Sales Credit Memo
 
 ```http
-DELETE {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesCreditMemos(b2c2d2e2-2222-3333-4444-555555555555)
+DELETE {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesCreditMemos(b2c2d2e2-2222-3333-4444-555555555555)
 Authorization: Bearer {access_token}
 If-Match: W/"JzIwOzIyO1NDTTI7Jw=="
 ```
@@ -216,7 +216,7 @@ If-Match: W/"JzIwOzIyO1NDTTI7Jw=="
 ### List Lines
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesCreditMemos(a1b1c1d1-1111-2222-3333-444444444444)/salesCreditMemoLines
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesCreditMemos(a1b1c1d1-1111-2222-3333-444444444444)/salesCreditMemoLines
 Authorization: Bearer {access_token}
 ```
 
@@ -267,7 +267,7 @@ DELETE .../salesCreditMemos({id})/salesCreditMemoLines({lineId})   (with If-Matc
 ### Post a Draft Credit Memo
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesCreditMemos(b2c2d2e2-2222-3333-4444-555555555555)/Microsoft.NAV.post
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesCreditMemos(b2c2d2e2-2222-3333-4444-555555555555)/Microsoft.NAV.post
 Authorization: Bearer {access_token}
 ```
 
@@ -276,7 +276,7 @@ Authorization: Bearer {access_token}
 ### Send Credit Memo by Email
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesCreditMemos(a1b1c1d1-1111-2222-3333-444444444444)/Microsoft.NAV.send
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesCreditMemos(a1b1c1d1-1111-2222-3333-444444444444)/Microsoft.NAV.send
 Authorization: Bearer {access_token}
 ```
 
@@ -288,13 +288,13 @@ Authorization: Bearer {access_token}
 
 ```http
 # Draft credit memos
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesCreditMemos?$filter=status eq 'Draft'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesCreditMemos?$filter=status eq 'Draft'
 
 # Posted (open) credit memos
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesCreditMemos?$filter=status eq 'Open'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesCreditMemos?$filter=status eq 'Open'
 
 # For a specific customer
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesCreditMemos?$filter=customerNumber eq '10000'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesCreditMemos?$filter=customerNumber eq '10000'
 ```
 
 ---

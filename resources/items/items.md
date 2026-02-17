@@ -7,7 +7,7 @@ Items represent the products, services, and non-inventory goods that your Busine
 ## Base Endpoint
 
 ```
-{{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/items
+{{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/items
 ```
 
 ---
@@ -17,7 +17,7 @@ Items represent the products, services, and non-inventory goods that your Busine
 ### 1. List All Items
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/items
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/items
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -112,7 +112,7 @@ Accept: application/json
 ### 2. Get a Single Item
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/items(b1c2d3e4-f5a6-7890-abcd-111111111111)
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/items(b1c2d3e4-f5a6-7890-abcd-111111111111)
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -124,7 +124,7 @@ Accept: application/json
 ### 3. Create an Item
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/items
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/items
 Authorization: Bearer {access_token}
 Content-Type: application/json
 ```
@@ -181,7 +181,7 @@ Content-Type: application/json
 ### 4. Update an Item
 
 ```http
-PATCH {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/items(b1c2d3e4-f5a6-7890-abcd-111111111111)
+PATCH {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/items(b1c2d3e4-f5a6-7890-abcd-111111111111)
 Authorization: Bearer {access_token}
 Content-Type: application/json
 If-Match: W/"JzE5OzExMTExMTExMTE7SVRFTTE7Jw=="
@@ -203,7 +203,7 @@ If-Match: W/"JzE5OzExMTExMTExMTE7SVRFTTE7Jw=="
 ### 5. Delete an Item
 
 ```http
-DELETE {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/items(b1c2d3e4-f5a6-7890-abcd-111111111111)
+DELETE {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/items(b1c2d3e4-f5a6-7890-abcd-111111111111)
 Authorization: Bearer {access_token}
 If-Match: W/"JzE5OzExMTExMTExMTE7SVRFTTE7Jw=="
 ```
@@ -248,7 +248,7 @@ If-Match: W/"JzE5OzExMTExMTExMTE7SVRFTTE7Jw=="
 Get inventory details per location:
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/items(b1c2d3e4-f5a6-7890-abcd-111111111111)/itemInventory
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/items(b1c2d3e4-f5a6-7890-abcd-111111111111)/itemInventory
 Authorization: Bearer {access_token}
 ```
 
@@ -258,22 +258,22 @@ Authorization: Bearer {access_token}
 
 ```http
 # Include item category details
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/items?$expand=itemCategory
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/items?$expand=itemCategory
 
 # Include inventory per location
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/items?$expand=inventory
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/items?$expand=inventory
 
 # Include default dimensions
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/items?$expand=defaultDimensions
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/items?$expand=defaultDimensions
 
 # Include picture
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/items?$expand=picture
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/items?$expand=picture
 
 # Include base unit of measure
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/items?$expand=baseUnitOfMeasure
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/items?$expand=baseUnitOfMeasure
 
 # Multiple expands
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/items?$expand=itemCategory,inventory,defaultDimensions
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/items?$expand=itemCategory,inventory,defaultDimensions
 ```
 
 ---
@@ -282,28 +282,28 @@ GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/items?$expand=itemCategory,inve
 
 ```http
 # Only inventory-type items
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/items?$filter=type eq 'Inventory'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/items?$filter=type eq 'Inventory'
 
 # Only service-type items
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/items?$filter=type eq 'Service'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/items?$filter=type eq 'Service'
 
 # Non-blocked items only
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/items?$filter=blocked eq false
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/items?$filter=blocked eq false
 
 # Items in stock
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/items?$filter=inventory gt 0
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/items?$filter=inventory gt 0
 
 # Search by name
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/items?$filter=contains(displayName,'Widget')
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/items?$filter=contains(displayName,'Widget')
 
 # Filter by category
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/items?$filter=itemCategoryCode eq 'FURNITURE'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/items?$filter=itemCategoryCode eq 'FURNITURE'
 
 # Items above a certain price
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/items?$filter=unitPrice gt 500
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/items?$filter=unitPrice gt 500
 
 # Combined: in-stock inventory items, select key fields, sorted
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/items?$filter=type eq 'Inventory' and blocked eq false and inventory gt 0&$select=number,displayName,inventory,unitPrice,itemCategoryCode&$orderby=displayName asc&$top=50
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/items?$filter=type eq 'Inventory' and blocked eq false and inventory gt 0&$select=number,displayName,inventory,unitPrice,itemCategoryCode&$orderby=displayName asc&$top=50
 ```
 
 ---

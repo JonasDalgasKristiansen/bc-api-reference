@@ -7,7 +7,7 @@ General ledger entries are the posted transactions in the general ledger. These 
 ## Base Endpoint
 
 ```
-{{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/generalLedgerEntries
+{{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/generalLedgerEntries
 ```
 
 ---
@@ -17,7 +17,7 @@ General ledger entries are the posted transactions in the general ledger. These 
 ### 1. List General Ledger Entries
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/generalLedgerEntries
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/generalLedgerEntries
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -76,7 +76,7 @@ Accept: application/json
 ### 2. Get a Single Entry
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/generalLedgerEntries(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/generalLedgerEntries(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -119,34 +119,34 @@ Accept: application/json
 
 ```http
 # Entries for a specific date
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/generalLedgerEntries?$filter=postingDate eq 2025-02-17
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/generalLedgerEntries?$filter=postingDate eq 2025-02-17
 
 # Entries for a date range
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/generalLedgerEntries?$filter=postingDate ge 2025-02-01 and postingDate le 2025-02-28
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/generalLedgerEntries?$filter=postingDate ge 2025-02-01 and postingDate le 2025-02-28
 
 # Entries for a specific G/L account
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/generalLedgerEntries?$filter=accountNumber eq '60100'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/generalLedgerEntries?$filter=accountNumber eq '60100'
 
 # Entries for a specific document
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/generalLedgerEntries?$filter=documentNumber eq 'GJ-001'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/generalLedgerEntries?$filter=documentNumber eq 'GJ-001'
 
 # Only invoice-related entries
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/generalLedgerEntries?$filter=documentType eq 'Invoice'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/generalLedgerEntries?$filter=documentType eq 'Invoice'
 
 # Debit entries only
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/generalLedgerEntries?$filter=debitAmount gt 0
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/generalLedgerEntries?$filter=debitAmount gt 0
 
 # Large transactions
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/generalLedgerEntries?$filter=debitAmount gt 10000 or creditAmount gt 10000
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/generalLedgerEntries?$filter=debitAmount gt 10000 or creditAmount gt 10000
 
 # Combined: invoices for a specific account in a date range
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/generalLedgerEntries?$filter=accountNumber eq '40100' and documentType eq 'Invoice' and postingDate ge 2025-01-01
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/generalLedgerEntries?$filter=accountNumber eq '40100' and documentType eq 'Invoice' and postingDate ge 2025-01-01
 
 # Order by posting date descending
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/generalLedgerEntries?$orderby=postingDate desc
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/generalLedgerEntries?$orderby=postingDate desc
 
 # Top 50 most recent entries
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/generalLedgerEntries?$orderby=entryNumber desc&$top=50
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/generalLedgerEntries?$orderby=entryNumber desc&$top=50
 ```
 
 ---
@@ -157,10 +157,10 @@ General ledger entries can contain thousands of records. Use `$top` and `$skip` 
 
 ```http
 # First page (100 entries)
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/generalLedgerEntries?$top=100
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/generalLedgerEntries?$top=100
 
 # Next page
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/generalLedgerEntries?$top=100&$skip=100
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/generalLedgerEntries?$top=100&$skip=100
 ```
 
 Or follow `@odata.nextLink` from the response:

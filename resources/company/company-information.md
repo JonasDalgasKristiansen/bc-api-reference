@@ -7,7 +7,7 @@ The company information resource provides detailed information about the current
 ## Base Endpoint
 
 ```
-{{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/companyInformation
+{{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/companyInformation
 ```
 
 ---
@@ -17,7 +17,7 @@ The company information resource provides detailed information about the current
 ### Request
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/companyInformation
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/companyInformation
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -62,7 +62,7 @@ Accept: application/json
 ### Request
 
 ```http
-PATCH {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/companyInformation({{id}})
+PATCH {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/companyInformation({{id}})
 Authorization: Bearer {access_token}
 Content-Type: application/json
 If-Match: W/"JzE5OzU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTtKT0hOOw=="

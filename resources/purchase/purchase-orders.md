@@ -7,7 +7,7 @@ Purchase orders represent orders placed with vendors for goods or services. They
 ## Base Endpoint
 
 ```
-{{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseOrders
+{{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseOrders
 ```
 
 ---
@@ -17,7 +17,7 @@ Purchase orders represent orders placed with vendors for goods or services. They
 ### 1. List All Purchase Orders
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseOrders
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseOrders
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -79,7 +79,7 @@ Accept: application/json
 ### 2. Get a Single Purchase Order
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseOrders(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseOrders(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -89,7 +89,7 @@ Accept: application/json
 ### 3. Create a Purchase Order
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseOrders
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseOrders
 Authorization: Bearer {access_token}
 Content-Type: application/json
 ```
@@ -158,7 +158,7 @@ Content-Type: application/json
 ### 4. Update a Purchase Order
 
 ```http
-PATCH {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseOrders(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
+PATCH {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseOrders(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
 Authorization: Bearer {access_token}
 Content-Type: application/json
 If-Match: W/"JzE5OzExO1BPMTsn"
@@ -178,7 +178,7 @@ If-Match: W/"JzE5OzExO1BPMTsn"
 ### 5. Delete a Purchase Order
 
 ```http
-DELETE {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseOrders(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
+DELETE {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseOrders(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
 Authorization: Bearer {access_token}
 If-Match: W/"JzE5OzExO1BPMTsn"
 ```
@@ -238,7 +238,7 @@ If-Match: W/"JzE5OzExO1BPMTsn"
 ### List Lines
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseOrders(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)/purchaseOrderLines
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseOrders(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)/purchaseOrderLines
 Authorization: Bearer {access_token}
 ```
 
@@ -306,7 +306,7 @@ DELETE .../purchaseOrders({id})/purchaseOrderLines({lineId})   (with If-Match)
 Records the receipt of items on the purchase order:
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseOrders(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)/Microsoft.NAV.receive
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseOrders(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)/Microsoft.NAV.receive
 Authorization: Bearer {access_token}
 ```
 
@@ -317,7 +317,7 @@ Authorization: Bearer {access_token}
 Receives items and creates a posted purchase invoice in a single step:
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseOrders(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)/Microsoft.NAV.receiveAndInvoice
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseOrders(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)/Microsoft.NAV.receiveAndInvoice
 Authorization: Bearer {access_token}
 ```
 
@@ -334,8 +334,8 @@ Authorization: Bearer {access_token}
 After receiving items, purchase receipts are created automatically:
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseReceipts
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseReceipts({id})/purchaseReceiptLines
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseReceipts
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseReceipts({id})/purchaseReceiptLines
 ```
 
 These are read-only and cannot be created or modified via the API.
@@ -346,19 +346,19 @@ These are read-only and cannot be created or modified via the API.
 
 ```http
 # Open purchase orders
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseOrders?$filter=status eq 'Open'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseOrders?$filter=status eq 'Open'
 
 # Not fully received
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseOrders?$filter=fullyReceived eq false
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseOrders?$filter=fullyReceived eq false
 
 # For a specific vendor
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseOrders?$filter=vendorNumber eq '10000'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseOrders?$filter=vendorNumber eq '10000'
 
 # Due this month
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseOrders?$filter=dueDate ge 2025-02-01 and dueDate le 2025-02-28
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseOrders?$filter=dueDate ge 2025-02-01 and dueDate le 2025-02-28
 
 # High-value orders
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/purchaseOrders?$filter=totalAmountExcludingTax gt 10000
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/purchaseOrders?$filter=totalAmountExcludingTax gt 10000
 ```
 
 ---

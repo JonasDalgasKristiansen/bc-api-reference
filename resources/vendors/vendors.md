@@ -7,7 +7,7 @@ Vendors are the suppliers and service providers that your Business Central compa
 ## Base Endpoint
 
 ```
-{{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/vendors
+{{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/vendors
 ```
 
 ---
@@ -17,7 +17,7 @@ Vendors are the suppliers and service providers that your Business Central compa
 ### 1. List All Vendors
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/vendors
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/vendors
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -87,7 +87,7 @@ Accept: application/json
 ### 2. Get a Single Vendor
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/vendors(a1a2a3a4-b5b6-c7c8-d9d0-e1e2e3e4e5e6)
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/vendors(a1a2a3a4-b5b6-c7c8-d9d0-e1e2e3e4e5e6)
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -99,7 +99,7 @@ Accept: application/json
 ### 3. Create a Vendor
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/vendors
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/vendors
 Authorization: Bearer {access_token}
 Content-Type: application/json
 ```
@@ -162,7 +162,7 @@ Content-Type: application/json
 ### 4. Update a Vendor
 
 ```http
-PATCH {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/vendors(a1a2a3a4-b5b6-c7c8-d9d0-e1e2e3e4e5e6)
+PATCH {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/vendors(a1a2a3a4-b5b6-c7c8-d9d0-e1e2e3e4e5e6)
 Authorization: Bearer {access_token}
 Content-Type: application/json
 If-Match: W/"JzE5OzExMjIzMzQ0NTU7VkVORDE7Jw=="
@@ -184,7 +184,7 @@ If-Match: W/"JzE5OzExMjIzMzQ0NTU7VkVORDE7Jw=="
 ### 5. Delete a Vendor
 
 ```http
-DELETE {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/vendors(a1a2a3a4-b5b6-c7c8-d9d0-e1e2e3e4e5e6)
+DELETE {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/vendors(a1a2a3a4-b5b6-c7c8-d9d0-e1e2e3e4e5e6)
 Authorization: Bearer {access_token}
 If-Match: W/"JzE5OzExMjIzMzQ0NTU7VkVORDE7Jw=="
 ```
@@ -226,22 +226,22 @@ If-Match: W/"JzE5OzExMjIzMzQ0NTU7VkVORDE7Jw=="
 
 ```http
 # Related currency record
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/vendors?$expand=currency
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/vendors?$expand=currency
 
 # Related payment terms record
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/vendors?$expand=paymentTerm
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/vendors?$expand=paymentTerm
 
 # Related payment method record
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/vendors?$expand=paymentMethod
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/vendors?$expand=paymentMethod
 
 # Default dimensions assigned to the vendor
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/vendors?$expand=defaultDimensions
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/vendors?$expand=defaultDimensions
 
 # Vendor picture / logo
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/vendors?$expand=picture
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/vendors?$expand=picture
 
 # Multiple expands
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/vendors?$expand=currency,paymentTerm,paymentMethod,defaultDimensions
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/vendors?$expand=currency,paymentTerm,paymentMethod,defaultDimensions
 ```
 
 ---
@@ -250,25 +250,25 @@ GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/vendors?$expand=currency,paymen
 
 ```http
 # Only non-blocked vendors
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/vendors?$filter=blocked eq ' '
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/vendors?$filter=blocked eq ' '
 
 # Vendors with outstanding balance (you owe them)
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/vendors?$filter=balance lt 0
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/vendors?$filter=balance lt 0
 
 # Search by name
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/vendors?$filter=contains(displayName,'Fabrikam')
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/vendors?$filter=contains(displayName,'Fabrikam')
 
 # Filter by currency
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/vendors?$filter=currencyCode eq 'USD'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/vendors?$filter=currencyCode eq 'USD'
 
 # Recently modified
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/vendors?$filter=lastModifiedDateTime gt 2024-01-01T00:00:00Z
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/vendors?$filter=lastModifiedDateTime gt 2024-01-01T00:00:00Z
 
 # Vendors with 1099 codes (US)
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/vendors?$filter=irs1099Code ne ''
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/vendors?$filter=irs1099Code ne ''
 
 # Combined: non-blocked with balance, select key fields
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/vendors?$filter=blocked eq ' ' and balance lt 0&$select=number,displayName,balance,email&$orderby=balance asc&$top=20
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/vendors?$filter=blocked eq ' ' and balance lt 0&$select=number,displayName,balance,email&$orderby=balance asc&$top=20
 ```
 
 ---

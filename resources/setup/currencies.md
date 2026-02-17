@@ -7,7 +7,7 @@ Currencies define the monetary units used in Business Central. The local currenc
 ## Base Endpoint
 
 ```
-{{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/currencies
+{{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/currencies
 ```
 
 ---
@@ -17,7 +17,7 @@ Currencies define the monetary units used in Business Central. The local currenc
 ### 1. List All Currencies
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/currencies
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/currencies
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -76,7 +76,7 @@ Accept: application/json
 ### 2. Get a Single Currency
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/currencies(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/currencies(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
 Authorization: Bearer {access_token}
 ```
 
@@ -85,7 +85,7 @@ Authorization: Bearer {access_token}
 ### 3. Create a Currency
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/currencies
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/currencies
 Authorization: Bearer {access_token}
 Content-Type: application/json
 ```
@@ -105,7 +105,7 @@ Content-Type: application/json
 ### 4. Update a Currency
 
 ```http
-PATCH {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/currencies(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
+PATCH {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/currencies(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
 Authorization: Bearer {access_token}
 Content-Type: application/json
 If-Match: W/"JzE5O0MxOyc="
@@ -122,7 +122,7 @@ If-Match: W/"JzE5O0MxOyc="
 ### 5. Delete a Currency
 
 ```http
-DELETE {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/currencies(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
+DELETE {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/currencies(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
 Authorization: Bearer {access_token}
 If-Match: W/"JzE5O0MxOyc="
 ```
@@ -149,7 +149,7 @@ If-Match: W/"JzE5O0MxOyc="
 
 ```http
 # Search by code
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/currencies?$filter=code eq 'EUR'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/currencies?$filter=code eq 'EUR'
 ```
 
 ---

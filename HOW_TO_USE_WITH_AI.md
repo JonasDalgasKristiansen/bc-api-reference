@@ -67,8 +67,7 @@ These tools can connect to a GitHub repo as a knowledge source.
 | `BC_CLIENT_ID`      | Azure Portal → App Registrations → Your App → Client ID      |
 | `BC_CLIENT_SECRET`  | Azure Portal → App Registrations → Certificates & Secrets    |
 | `BC_ENVIRONMENT`    | Usually `Production` or `Sandbox`                             |
-| `BC_COMPANY_ID`     | Call `GET .../api/v2.0/companies` and copy the `id` field     |
-| `BC_COMPANY_NAME`   | Your company display name (optional)                          |
+| `BC_COMPANY_NAME`   | Your company display name — find it in BC → Settings → Company Information |
 
 ### Prompting
 
@@ -177,7 +176,7 @@ Config from .env. Cache the OAuth2 token for 55 minutes.
 
 4. **For multi-resource features, include multiple `.md` files.** If your feature touches customers and sales invoices, include both resource files as context.
 
-5. **Reference the `.env.example` variable names.** The AI should use the exact variable names from `.env.example` (e.g., `BC_BASE_URL`, `BC_COMPANY_ID`) so the generated code works with your config file.
+5. **Reference the `.env.example` variable names.** The AI should use the exact variable names from `.env.example` (e.g., `BC_BASE_URL`, `BC_COMPANY_NAME`) so the generated code works with your config file.
 
 6. **Ask for error handling explicitly.** Add to your prompt: "Handle HTTP errors: 401 (refresh token), 404 (show not found), 409 (ETag conflict — retry with fresh data), 429 (rate limit — retry after delay)."
 

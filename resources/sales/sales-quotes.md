@@ -7,7 +7,7 @@ Sales quotes are preliminary offers sent to customers before an order or invoice
 ## Base Endpoint
 
 ```
-{{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesQuotes
+{{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesQuotes
 ```
 
 ---
@@ -17,7 +17,7 @@ Sales quotes are preliminary offers sent to customers before an order or invoice
 ### 1. List All Sales Quotes
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesQuotes
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesQuotes
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -75,7 +75,7 @@ Accept: application/json
 ### 2. Get a Single Sales Quote
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesQuotes(a1b1c1d1-e1f1-1111-2222-333333333333)
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesQuotes(a1b1c1d1-e1f1-1111-2222-333333333333)
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -85,7 +85,7 @@ Accept: application/json
 ### 3. Create a Sales Quote
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesQuotes
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesQuotes
 Authorization: Bearer {access_token}
 Content-Type: application/json
 ```
@@ -151,7 +151,7 @@ Content-Type: application/json
 ### 4. Update a Sales Quote
 
 ```http
-PATCH {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesQuotes(a1b1c1d1-e1f1-1111-2222-333333333333)
+PATCH {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesQuotes(a1b1c1d1-e1f1-1111-2222-333333333333)
 Authorization: Bearer {access_token}
 Content-Type: application/json
 If-Match: W/"JzE5OzExMTExMTsxMDAwO1NRMTsn"
@@ -171,7 +171,7 @@ If-Match: W/"JzE5OzExMTExMTsxMDAwO1NRMTsn"
 ### 5. Delete a Sales Quote
 
 ```http
-DELETE {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesQuotes(a1b1c1d1-e1f1-1111-2222-333333333333)
+DELETE {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesQuotes(a1b1c1d1-e1f1-1111-2222-333333333333)
 Authorization: Bearer {access_token}
 If-Match: W/"JzE5OzExMTExMTsxMDAwO1NRMTsn"
 ```
@@ -227,7 +227,7 @@ If-Match: W/"JzE5OzExMTExMTsxMDAwO1NRMTsn"
 ### List Lines
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesQuotes(a1b1c1d1-e1f1-1111-2222-333333333333)/salesQuoteLines
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesQuotes(a1b1c1d1-e1f1-1111-2222-333333333333)/salesQuoteLines
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -271,7 +271,7 @@ Accept: application/json
 ### Create a Quote Line
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesQuotes(a1b1c1d1-e1f1-1111-2222-333333333333)/salesQuoteLines
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesQuotes(a1b1c1d1-e1f1-1111-2222-333333333333)/salesQuoteLines
 Authorization: Bearer {access_token}
 Content-Type: application/json
 ```
@@ -290,7 +290,7 @@ Content-Type: application/json
 ### Update a Quote Line
 
 ```http
-PATCH {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesQuotes(a1b1c1d1-e1f1-1111-2222-333333333333)/salesQuoteLines(c3d3e3f3-a3b3-3333-4444-555555555555)
+PATCH {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesQuotes(a1b1c1d1-e1f1-1111-2222-333333333333)/salesQuoteLines(c3d3e3f3-a3b3-3333-4444-555555555555)
 Authorization: Bearer {access_token}
 Content-Type: application/json
 If-Match: W/"JzE5O1NRTDEn"
@@ -308,7 +308,7 @@ If-Match: W/"JzE5O1NRTDEn"
 ### Delete a Quote Line
 
 ```http
-DELETE {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesQuotes(a1b1c1d1-e1f1-1111-2222-333333333333)/salesQuoteLines(c3d3e3f3-a3b3-3333-4444-555555555555)
+DELETE {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesQuotes(a1b1c1d1-e1f1-1111-2222-333333333333)/salesQuoteLines(c3d3e3f3-a3b3-3333-4444-555555555555)
 Authorization: Bearer {access_token}
 If-Match: W/"JzE5O1NRTDEn"
 ```
@@ -348,7 +348,7 @@ If-Match: W/"JzE5O1NRTDEn"
 ### Convert Quote to Invoice
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesQuotes(a1b1c1d1-e1f1-1111-2222-333333333333)/Microsoft.NAV.makeInvoice
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesQuotes(a1b1c1d1-e1f1-1111-2222-333333333333)/Microsoft.NAV.makeInvoice
 Authorization: Bearer {access_token}
 ```
 
@@ -357,7 +357,7 @@ Authorization: Bearer {access_token}
 ### Convert Quote to Order
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesQuotes(a1b1c1d1-e1f1-1111-2222-333333333333)/Microsoft.NAV.makeOrder
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesQuotes(a1b1c1d1-e1f1-1111-2222-333333333333)/Microsoft.NAV.makeOrder
 Authorization: Bearer {access_token}
 ```
 
@@ -366,7 +366,7 @@ Authorization: Bearer {access_token}
 ### Send Quote by Email
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesQuotes(a1b1c1d1-e1f1-1111-2222-333333333333)/Microsoft.NAV.send
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesQuotes(a1b1c1d1-e1f1-1111-2222-333333333333)/Microsoft.NAV.send
 Authorization: Bearer {access_token}
 ```
 

@@ -7,7 +7,7 @@ Sales orders represent confirmed customer orders that will be shipped and invoic
 ## Base Endpoint
 
 ```
-{{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesOrders
+{{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesOrders
 ```
 
 ---
@@ -17,7 +17,7 @@ Sales orders represent confirmed customer orders that will be shipped and invoic
 ### 1. List All Sales Orders
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesOrders
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesOrders
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -76,7 +76,7 @@ Accept: application/json
 ### 2. Get a Single Sales Order
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesOrders(a1a1b1b1-c1c1-d1d1-e1e1-f1f1f1f1f1f1)
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesOrders(a1a1b1b1-c1c1-d1d1-e1e1-f1f1f1f1f1f1)
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -86,7 +86,7 @@ Accept: application/json
 ### 3. Create a Sales Order
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesOrders
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesOrders
 Authorization: Bearer {access_token}
 Content-Type: application/json
 ```
@@ -153,7 +153,7 @@ Content-Type: application/json
 ### 4. Update a Sales Order
 
 ```http
-PATCH {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesOrders(a1a1b1b1-c1c1-d1d1-e1e1-f1f1f1f1f1f1)
+PATCH {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesOrders(a1a1b1b1-c1c1-d1d1-e1e1-f1f1f1f1f1f1)
 Authorization: Bearer {access_token}
 Content-Type: application/json
 If-Match: W/"JzE5OzExO1NPMTsn"
@@ -173,7 +173,7 @@ If-Match: W/"JzE5OzExO1NPMTsn"
 ### 5. Delete a Sales Order
 
 ```http
-DELETE {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesOrders(a1a1b1b1-c1c1-d1d1-e1e1-f1f1f1f1f1f1)
+DELETE {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesOrders(a1a1b1b1-c1c1-d1d1-e1e1-f1f1f1f1f1f1)
 Authorization: Bearer {access_token}
 If-Match: W/"JzE5OzExO1NPMTsn"
 ```
@@ -230,7 +230,7 @@ If-Match: W/"JzE5OzExO1NPMTsn"
 ### List Order Lines
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesOrders(a1a1b1b1-c1c1-d1d1-e1e1-f1f1f1f1f1f1)/salesOrderLines
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesOrders(a1a1b1b1-c1c1-d1d1-e1e1-f1f1f1f1f1f1)/salesOrderLines
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -290,7 +290,7 @@ DELETE .../salesOrders({id})/salesOrderLines({lineId})
 Ships all items and creates an invoice in a single action:
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesOrders(a1a1b1b1-c1c1-d1d1-e1e1-f1f1f1f1f1f1)/Microsoft.NAV.shipAndInvoice
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesOrders(a1a1b1b1-c1c1-d1d1-e1e1-f1f1f1f1f1f1)/Microsoft.NAV.shipAndInvoice
 Authorization: Bearer {access_token}
 ```
 
@@ -304,16 +304,16 @@ Authorization: Bearer {access_token}
 
 ```http
 # Open orders only
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesOrders?$filter=status eq 'Open'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesOrders?$filter=status eq 'Open'
 
 # Not fully shipped
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesOrders?$filter=fullyShipped eq false
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesOrders?$filter=fullyShipped eq false
 
 # Orders for a specific customer
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesOrders?$filter=customerNumber eq '10000'
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesOrders?$filter=customerNumber eq '10000'
 
 # Orders due this month
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/salesOrders?$filter=dueDate ge 2025-02-01 and dueDate le 2025-02-28
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/salesOrders?$filter=dueDate ge 2025-02-01 and dueDate le 2025-02-28
 ```
 
 ---

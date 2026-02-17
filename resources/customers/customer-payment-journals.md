@@ -7,7 +7,7 @@ Customer payment journals are used to record payments received from customers. E
 ## Base Endpoint
 
 ```
-{{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customerPaymentJournals
+{{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customerPaymentJournals
 ```
 
 ---
@@ -17,7 +17,7 @@ Customer payment journals are used to record payments received from customers. E
 ### List All Customer Payment Journals
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customerPaymentJournals
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customerPaymentJournals
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -53,7 +53,7 @@ Accept: application/json
 ### Get a Single Customer Payment Journal
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customerPaymentJournals(b1c2d3e4-f5a6-7890-1234-567890abcdef)
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customerPaymentJournals(b1c2d3e4-f5a6-7890-1234-567890abcdef)
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -61,7 +61,7 @@ Accept: application/json
 ### Create a Customer Payment Journal
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customerPaymentJournals
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customerPaymentJournals
 Authorization: Bearer {access_token}
 Content-Type: application/json
 ```
@@ -93,7 +93,7 @@ Content-Type: application/json
 ### Delete a Customer Payment Journal
 
 ```http
-DELETE {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customerPaymentJournals(b1c2d3e4-f5a6-7890-1234-567890abcdef)
+DELETE {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customerPaymentJournals(b1c2d3e4-f5a6-7890-1234-567890abcdef)
 Authorization: Bearer {access_token}
 If-Match: W/"JzE5OzExMTExMTExMTE7Q1BKOw=="
 ```
@@ -120,7 +120,7 @@ If-Match: W/"JzE5OzExMTExMTExMTE7Q1BKOw=="
 ### List Lines for a Journal
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customerPaymentJournals(b1c2d3e4-f5a6-7890-1234-567890abcdef)/customerPaymentJournalLines
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customerPaymentJournals(b1c2d3e4-f5a6-7890-1234-567890abcdef)/customerPaymentJournalLines
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -174,7 +174,7 @@ Accept: application/json
 ### Create a Journal Line
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customerPaymentJournals(b1c2d3e4-f5a6-7890-1234-567890abcdef)/customerPaymentJournalLines
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customerPaymentJournals(b1c2d3e4-f5a6-7890-1234-567890abcdef)/customerPaymentJournalLines
 Authorization: Bearer {access_token}
 Content-Type: application/json
 ```
@@ -219,7 +219,7 @@ Content-Type: application/json
 ### Update a Journal Line
 
 ```http
-PATCH {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customerPaymentJournals(b1c2d3e4-f5a6-7890-1234-567890abcdef)/customerPaymentJournalLines(e4f5a6b7-c8d9-0123-4567-890abcdef123)
+PATCH {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customerPaymentJournals(b1c2d3e4-f5a6-7890-1234-567890abcdef)/customerPaymentJournalLines(e4f5a6b7-c8d9-0123-4567-890abcdef123)
 Authorization: Bearer {access_token}
 Content-Type: application/json
 If-Match: W/"JzE5OzQ0NDQ0NDQ0NDQ7Q1BKTDE7Jw=="
@@ -237,7 +237,7 @@ If-Match: W/"JzE5OzQ0NDQ0NDQ0NDQ7Q1BKTDE7Jw=="
 ### Delete a Journal Line
 
 ```http
-DELETE {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customerPaymentJournals(b1c2d3e4-f5a6-7890-1234-567890abcdef)/customerPaymentJournalLines(e4f5a6b7-c8d9-0123-4567-890abcdef123)
+DELETE {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customerPaymentJournals(b1c2d3e4-f5a6-7890-1234-567890abcdef)/customerPaymentJournalLines(e4f5a6b7-c8d9-0123-4567-890abcdef123)
 Authorization: Bearer {access_token}
 If-Match: W/"JzE5OzQ0NDQ0NDQ0NDQ7Q1BKTDE7Jw=="
 ```
@@ -273,7 +273,7 @@ If-Match: W/"JzE5OzQ0NDQ0NDQ0NDQ7Q1BKTDE7Jw=="
 Post all lines in a customer payment journal:
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/customerPaymentJournals(b1c2d3e4-f5a6-7890-1234-567890abcdef)/Microsoft.NAV.post
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customerPaymentJournals(b1c2d3e4-f5a6-7890-1234-567890abcdef)/Microsoft.NAV.post
 Authorization: Bearer {access_token}
 ```
 

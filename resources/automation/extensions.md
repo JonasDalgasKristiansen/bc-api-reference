@@ -7,7 +7,7 @@ The Automation API extensions endpoint allows you to manage installed extensions
 ## Base Endpoint
 
 ```
-{{BC_AUTOMATION_URL}}/companies({{BC_COMPANY_ID}})/extensions
+{{BC_AUTOMATION_URL}}/companies(name='{{BC_COMPANY_NAME}}')/extensions
 ```
 
 ---
@@ -17,7 +17,7 @@ The Automation API extensions endpoint allows you to manage installed extensions
 ### 1. List Installed Extensions
 
 ```http
-GET {{BC_AUTOMATION_URL}}/companies({{BC_COMPANY_ID}})/extensions
+GET {{BC_AUTOMATION_URL}}/companies(name='{{BC_COMPANY_NAME}}')/extensions
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -72,7 +72,7 @@ Accept: application/json
 ### 2. Get a Single Extension
 
 ```http
-GET {{BC_AUTOMATION_URL}}/companies({{BC_COMPANY_ID}})/extensions(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
+GET {{BC_AUTOMATION_URL}}/companies(name='{{BC_COMPANY_NAME}}')/extensions(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
 Authorization: Bearer {access_token}
 ```
 
@@ -100,7 +100,7 @@ Authorization: Bearer {access_token}
 Install an extension from AppSource or a previously uploaded package:
 
 ```http
-POST {{BC_AUTOMATION_URL}}/companies({{BC_COMPANY_ID}})/extensions(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)/Microsoft.NAV.install
+POST {{BC_AUTOMATION_URL}}/companies(name='{{BC_COMPANY_NAME}}')/extensions(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)/Microsoft.NAV.install
 Authorization: Bearer {access_token}
 ```
 
@@ -115,7 +115,7 @@ Authorization: Bearer {access_token}
 Uninstall an installed extension:
 
 ```http
-POST {{BC_AUTOMATION_URL}}/companies({{BC_COMPANY_ID}})/extensions(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)/Microsoft.NAV.uninstall
+POST {{BC_AUTOMATION_URL}}/companies(name='{{BC_COMPANY_NAME}}')/extensions(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)/Microsoft.NAV.uninstall
 Authorization: Bearer {access_token}
 ```
 
@@ -130,7 +130,7 @@ Authorization: Bearer {access_token}
 Upload a custom extension (.app file) to the environment:
 
 ```http
-POST {{BC_AUTOMATION_URL}}/companies({{BC_COMPANY_ID}})/extensionUpload/Microsoft.NAV.upload
+POST {{BC_AUTOMATION_URL}}/companies(name='{{BC_COMPANY_NAME}}')/extensionUpload/Microsoft.NAV.upload
 Authorization: Bearer {access_token}
 Content-Type: application/octet-stream
 ```
@@ -150,7 +150,7 @@ After uploading, the extension appears in the extensions list with `isInstalled:
 Track the status of install/uninstall operations:
 
 ```http
-GET {{BC_AUTOMATION_URL}}/companies({{BC_COMPANY_ID}})/extensionDeploymentStatus
+GET {{BC_AUTOMATION_URL}}/companies(name='{{BC_COMPANY_NAME}}')/extensionDeploymentStatus
 Authorization: Bearer {access_token}
 ```
 
@@ -188,13 +188,13 @@ Authorization: Bearer {access_token}
 
 ```http
 # Installed extensions only
-GET {{BC_AUTOMATION_URL}}/companies({{BC_COMPANY_ID}})/extensions?$filter=isInstalled eq true
+GET {{BC_AUTOMATION_URL}}/companies(name='{{BC_COMPANY_NAME}}')/extensions?$filter=isInstalled eq true
 
 # Extensions by a specific publisher
-GET {{BC_AUTOMATION_URL}}/companies({{BC_COMPANY_ID}})/extensions?$filter=publisher eq 'Microsoft'
+GET {{BC_AUTOMATION_URL}}/companies(name='{{BC_COMPANY_NAME}}')/extensions?$filter=publisher eq 'Microsoft'
 
 # Per-tenant extensions
-GET {{BC_AUTOMATION_URL}}/companies({{BC_COMPANY_ID}})/extensions?$filter=publishedAs eq 'PTE'
+GET {{BC_AUTOMATION_URL}}/companies(name='{{BC_COMPANY_NAME}}')/extensions?$filter=publishedAs eq 'PTE'
 ```
 
 ---

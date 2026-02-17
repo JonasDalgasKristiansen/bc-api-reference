@@ -7,7 +7,7 @@ The Automation API users endpoint allows you to manage users within a Business C
 ## Base Endpoint
 
 ```
-{{BC_AUTOMATION_URL}}/companies({{BC_COMPANY_ID}})/users
+{{BC_AUTOMATION_URL}}/companies(name='{{BC_COMPANY_NAME}}')/users
 ```
 
 ---
@@ -17,7 +17,7 @@ The Automation API users endpoint allows you to manage users within a Business C
 ### 1. List All Users
 
 ```http
-GET {{BC_AUTOMATION_URL}}/companies({{BC_COMPANY_ID}})/users
+GET {{BC_AUTOMATION_URL}}/companies(name='{{BC_COMPANY_NAME}}')/users
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -63,7 +63,7 @@ Accept: application/json
 ### 2. Get a Single User
 
 ```http
-GET {{BC_AUTOMATION_URL}}/companies({{BC_COMPANY_ID}})/users(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
+GET {{BC_AUTOMATION_URL}}/companies(name='{{BC_COMPANY_NAME}}')/users(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)
 Authorization: Bearer {access_token}
 ```
 
@@ -72,7 +72,7 @@ Authorization: Bearer {access_token}
 ### 3. Update a User
 
 ```http
-PATCH {{BC_AUTOMATION_URL}}/companies({{BC_COMPANY_ID}})/users(b2b2b2b2-2222-2222-2222-bbbbbbbbbbbb)
+PATCH {{BC_AUTOMATION_URL}}/companies(name='{{BC_COMPANY_NAME}}')/users(b2b2b2b2-2222-2222-2222-bbbbbbbbbbbb)
 Authorization: Bearer {access_token}
 Content-Type: application/json
 If-Match: W/"JzIwO1UyOyc="
@@ -104,7 +104,7 @@ If-Match: W/"JzIwO1UyOyc="
 ### List User Permissions
 
 ```http
-GET {{BC_AUTOMATION_URL}}/companies({{BC_COMPANY_ID}})/users(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)/userPermissions
+GET {{BC_AUTOMATION_URL}}/companies(name='{{BC_COMPANY_NAME}}')/users(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)/userPermissions
 Authorization: Bearer {access_token}
 ```
 
@@ -140,7 +140,7 @@ Authorization: Bearer {access_token}
 ### Add a Permission Set to a User
 
 ```http
-POST {{BC_AUTOMATION_URL}}/companies({{BC_COMPANY_ID}})/users(b2b2b2b2-2222-2222-2222-bbbbbbbbbbbb)/userPermissions
+POST {{BC_AUTOMATION_URL}}/companies(name='{{BC_COMPANY_NAME}}')/users(b2b2b2b2-2222-2222-2222-bbbbbbbbbbbb)/userPermissions
 Authorization: Bearer {access_token}
 Content-Type: application/json
 ```
@@ -157,7 +157,7 @@ Content-Type: application/json
 ### Remove a Permission Set
 
 ```http
-DELETE {{BC_AUTOMATION_URL}}/companies({{BC_COMPANY_ID}})/users(b2b2b2b2-2222-2222-2222-bbbbbbbbbbbb)/userPermissions(d4d4d4d4-4444-4444-4444-dddddddddddd)
+DELETE {{BC_AUTOMATION_URL}}/companies(name='{{BC_COMPANY_NAME}}')/users(b2b2b2b2-2222-2222-2222-bbbbbbbbbbbb)/userPermissions(d4d4d4d4-4444-4444-4444-dddddddddddd)
 Authorization: Bearer {access_token}
 ```
 
@@ -183,7 +183,7 @@ Authorization: Bearer {access_token}
 ### List User Group Memberships
 
 ```http
-GET {{BC_AUTOMATION_URL}}/companies({{BC_COMPANY_ID}})/users(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)/userGroupMembers
+GET {{BC_AUTOMATION_URL}}/companies(name='{{BC_COMPANY_NAME}}')/users(a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa)/userGroupMembers
 Authorization: Bearer {access_token}
 ```
 
@@ -206,7 +206,7 @@ Authorization: Bearer {access_token}
 ### Add User to a User Group
 
 ```http
-POST {{BC_AUTOMATION_URL}}/companies({{BC_COMPANY_ID}})/users(b2b2b2b2-2222-2222-2222-bbbbbbbbbbbb)/userGroupMembers
+POST {{BC_AUTOMATION_URL}}/companies(name='{{BC_COMPANY_NAME}}')/users(b2b2b2b2-2222-2222-2222-bbbbbbbbbbbb)/userGroupMembers
 Authorization: Bearer {access_token}
 Content-Type: application/json
 ```
@@ -244,10 +244,10 @@ Content-Type: application/json
 
 ```http
 # Enabled users only
-GET {{BC_AUTOMATION_URL}}/companies({{BC_COMPANY_ID}})/users?$filter=state eq 'Enabled'
+GET {{BC_AUTOMATION_URL}}/companies(name='{{BC_COMPANY_NAME}}')/users?$filter=state eq 'Enabled'
 
 # Find a specific user by name
-GET {{BC_AUTOMATION_URL}}/companies({{BC_COMPANY_ID}})/users?$filter=userName eq 'JDOE'
+GET {{BC_AUTOMATION_URL}}/companies(name='{{BC_COMPANY_NAME}}')/users?$filter=userName eq 'JDOE'
 ```
 
 ---

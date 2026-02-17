@@ -42,7 +42,7 @@ Accept: application/json
       "@odata.etag": "W/\"JzE5O1NVQjEn\"",
       "subscriptionId": "a1a1a1a1-1111-1111-1111-aaaaaaaaaaaa",
       "notificationUrl": "https://myapp.example.com/api/bc-webhooks",
-      "resource": "companies({{BC_COMPANY_ID}})/customers",
+      "resource": "companies(name='{{BC_COMPANY_NAME}}')/customers",
       "userId": "00000000-0000-0000-0000-000000000000",
       "lastModifiedDateTime": "2025-02-17T10:00:00Z",
       "clientState": "my-secret-state-value",
@@ -78,7 +78,7 @@ Content-Type: application/json
 ```json
 {
   "notificationUrl": "https://myapp.example.com/api/bc-webhooks",
-  "resource": "companies({{BC_COMPANY_ID}})/customers",
+  "resource": "companies(name='{{BC_COMPANY_NAME}}')/customers",
   "clientState": "my-secret-state-value"
 }
 ```
@@ -90,7 +90,7 @@ Content-Type: application/json
   "@odata.etag": "W/\"JzIwO1NVQjIn\"",
   "subscriptionId": "b2b2b2b2-2222-2222-2222-bbbbbbbbbbbb",
   "notificationUrl": "https://myapp.example.com/api/bc-webhooks",
-  "resource": "companies({{BC_COMPANY_ID}})/customers",
+  "resource": "companies(name='{{BC_COMPANY_NAME}}')/customers",
   "userId": "00000000-0000-0000-0000-000000000000",
   "lastModifiedDateTime": "2025-02-17T10:30:00Z",
   "clientState": "my-secret-state-value",
@@ -195,7 +195,7 @@ Content-Type: application/json
       "subscriptionId": "b2b2b2b2-2222-2222-2222-bbbbbbbbbbbb",
       "clientState": "my-secret-state-value",
       "expirationDateTime": "2025-02-20T10:30:00Z",
-      "resource": "companies({{BC_COMPANY_ID}})/customers(c1d2e3f4-a5b6-7890-cdef-999999999999)",
+      "resource": "companies(name='{{BC_COMPANY_NAME}}')/customers(c1d2e3f4-a5b6-7890-cdef-999999999999)",
       "changeType": "updated",
       "lastModifiedDateTime": "2025-02-17T14:30:00Z"
     }

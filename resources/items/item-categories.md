@@ -7,7 +7,7 @@ Item categories are used to group and classify items in Business Central. They p
 ## Base Endpoint
 
 ```
-{{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/itemCategories
+{{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/itemCategories
 ```
 
 ---
@@ -17,7 +17,7 @@ Item categories are used to group and classify items in Business Central. They p
 ### 1. List All Item Categories
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/itemCategories
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/itemCategories
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -56,7 +56,7 @@ Accept: application/json
 ### 2. Get a Single Item Category
 
 ```http
-GET {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/itemCategories(d3e4f5a6-b7c8-9012-3456-888888888888)
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/itemCategories(d3e4f5a6-b7c8-9012-3456-888888888888)
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
@@ -64,7 +64,7 @@ Accept: application/json
 ### 3. Create an Item Category
 
 ```http
-POST {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/itemCategories
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/itemCategories
 Authorization: Bearer {access_token}
 Content-Type: application/json
 ```
@@ -93,7 +93,7 @@ Content-Type: application/json
 ### 4. Update an Item Category
 
 ```http
-PATCH {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/itemCategories(d3e4f5a6-b7c8-9012-3456-888888888888)
+PATCH {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/itemCategories(d3e4f5a6-b7c8-9012-3456-888888888888)
 Authorization: Bearer {access_token}
 Content-Type: application/json
 If-Match: W/"JzE5OzIyMjIyMjIyMjI7Q0FUMg=="
@@ -110,7 +110,7 @@ If-Match: W/"JzE5OzIyMjIyMjIyMjI7Q0FUMg=="
 ### 5. Delete an Item Category
 
 ```http
-DELETE {{BC_BASE_URL}}/companies({{BC_COMPANY_ID}})/itemCategories(d3e4f5a6-b7c8-9012-3456-888888888888)
+DELETE {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/itemCategories(d3e4f5a6-b7c8-9012-3456-888888888888)
 Authorization: Bearer {access_token}
 If-Match: W/"JzE5OzIyMjIyMjIyMjI7Q0FUMg=="
 ```
