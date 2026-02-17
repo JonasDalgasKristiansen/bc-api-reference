@@ -151,7 +151,7 @@ When building a web application (e.g., in Lovable or Bolt), you MUST use a backe
 | Specific resource fields and examples    | `resources/{category}/{resource}.md`                 |
 | OData query patterns                     | `resources/_overview.md` — OData Cheat Sheet section |
 | Bound actions (post, send, etc.)         | `resources/_overview.md` — Bound Actions table       |
-| Authentication setup                     | `README.md` — Authentication section                 |
+| Authentication setup                     | `README.md` — Setup Guide + `DEVELOPER_GUIDE.md` — full technical details |
 | Environment variable names               | `.env.example`                                       |
 | Time registration / time sheets          | `resources/time-tracking/time-registration-entries.md` — READ THE WARNINGS about Time Sheet headers vs lines |
 | Projects / Jobs                          | `resources/projects/projects.md` — ⚠️ `/projects` may 404 on older BC; has OData fallback |
