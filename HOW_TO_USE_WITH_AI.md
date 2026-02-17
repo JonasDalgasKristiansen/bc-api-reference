@@ -2,7 +2,9 @@
 
 This repository is specifically structured so that AI coding tools — **Lovable**, **Bolt**, **Cursor**, **GitHub Copilot**, **Claude**, **ChatGPT**, and others — can read it as context and generate **fully working Business Central integrations** without needing any additional documentation.
 
-Every resource file contains complete HTTP examples, realistic JSON payloads, all field definitions with data types, OData query patterns, and error handling guidance. The `.env.example` file defines every configuration variable your app will need.
+Every resource file contains complete HTTP examples, realistic JSON payloads, all field definitions with data types, OData query patterns, and error handling guidance. The `.env.example` file defines every required secret / environment variable your app will need.
+
+> **This is a public repo.** It contains NO credentials. All sensitive values must be added as **platform secrets** (Lovable, Bolt) or a local `.env` file (never committed).
 
 ---
 
@@ -10,12 +12,12 @@ Every resource file contains complete HTTP examples, realistic JSON payloads, al
 
 The workflow is the same regardless of which AI tool you use:
 
-1. **Clone this repo** (or connect it as a knowledge source)
-2. **Fill in your `.env`** — copy `.env.example` to `.env` and enter your real credentials (see [README.md](README.md) for the authentication guide)
+1. **Connect this repo** as a knowledge source (Lovable/Bolt) or clone it locally
+2. **Add your secrets** — add each variable from `.env.example` as a platform secret (Lovable: Settings → Secrets) or copy `.env.example` to `.env` locally
 3. **Open the relevant resource `.md` file(s)** for the feature you want to build (e.g., `resources/sales/sales-invoices.md`)
 4. **Paste the file contents as context** to your AI tool (or let it read the workspace)
 5. **Write your prompt** describing what you want to build
-6. The AI generates code that matches the exact API shapes, uses your `.env` variables, and handles authentication correctly
+6. The AI generates code that reads credentials from environment secrets, matches the exact API shapes, and handles authentication correctly
 
 ---
 
@@ -53,15 +55,29 @@ These tools can read your open workspace as context automatically.
 
 These tools can connect to a GitHub repo as a knowledge source.
 
-```
-1. Push this repo to GitHub (your .env is gitignored, so it is safe)
-2. In Lovable/Bolt, connect your GitHub repo as a knowledge source
-3. Prompt example:
+### Setup (one-time)
 
-   "Build a customer list page that fetches customers from the
-    Business Central API. Use the API structure from the connected repo.
-    Config comes from .env variables.
-    Show: customer number, name, email, balance, and a link to view details."
+1. In Lovable/Bolt, connect this GitHub repo as a knowledge source
+2. Go to **Settings → Secrets** (Lovable) or **Environment Variables** (Bolt)
+3. Add these secrets with your real values:
+
+| Secret Name         | Where to find it                                              |
+|---------------------|---------------------------------------------------------------|
+| `BC_TENANT_ID`      | Azure Portal → Entra ID → Overview → Tenant ID               |
+| `BC_CLIENT_ID`      | Azure Portal → App Registrations → Your App → Client ID      |
+| `BC_CLIENT_SECRET`  | Azure Portal → App Registrations → Certificates & Secrets    |
+| `BC_ENVIRONMENT`    | Usually `Production` or `Sandbox`                             |
+| `BC_COMPANY_ID`     | Call `GET .../api/v2.0/companies` and copy the `id` field     |
+| `BC_COMPANY_NAME`   | Your company display name (optional)                          |
+
+### Prompting
+
+```
+"Build a customer list page that fetches customers from the
+ Business Central API. Use the API structure from the connected repo.
+ Credentials are stored as Lovable Secrets — access them via
+ import.meta.env or process.env (never hardcode them).
+ Show: customer number, name, email, balance, and a link to view details."
 ```
 
 **For multi-page apps:**
@@ -72,7 +88,8 @@ These tools can connect to a GitHub repo as a knowledge source.
  - A sales invoices list page with status filters
  - A detail page for each invoice showing line items
  - A 'Post Invoice' button that calls the bound action
- All API shapes and auth are defined in the repo."
+ All API shapes and auth are defined in the repo.
+ All credentials come from platform secrets (never hardcoded)."
 ```
 
 ---
@@ -154,7 +171,7 @@ Config from .env. Cache the OAuth2 token for 55 minutes.
 
 1. **Always include the relevant resource `.md` file as context.** The more specific API documentation the AI has, the more accurate its code will be.
 
-2. **Mention that all config variables come from `.env`.** Tell the AI explicitly: "Never hardcode credentials. All configuration comes from environment variables defined in `.env`."
+2. **Mention that all config comes from secrets / environment variables.** Tell the AI explicitly: "Never hardcode credentials. All configuration comes from platform secrets (Lovable/Bolt) or environment variables. Variable names are defined in `.env.example`."
 
 3. **Tell the AI to handle token expiry.** Include this in your prompt: "The OAuth2 token has a 1-hour TTL. Cache it and refresh automatically before expiry."
 

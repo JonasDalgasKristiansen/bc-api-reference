@@ -31,16 +31,32 @@ It is designed for two audiences:
 
 ## Quick Start
 
+### For Lovable / Bolt (recommended)
+
+1. Connect this GitHub repo as a knowledge source in your project
+2. Add your credentials as **Secrets** in the platform (not in code):
+   - In **Lovable**: Settings → Secrets → add each variable from `.env.example`
+   - In **Bolt**: Settings → Environment Variables
+3. The required secret names are listed in `.env.example` — add these:
+   - `BC_TENANT_ID` — your Azure / Entra ID tenant ID
+   - `BC_CLIENT_ID` — your app registration client ID
+   - `BC_CLIENT_SECRET` — your app registration client secret
+   - `BC_ENVIRONMENT` — `Production` or `Sandbox`
+   - `BC_COMPANY_ID` — the GUID of your BC company
+4. Prompt the AI to build your feature — it will read the API reference from this repo and use your secrets for auth
+
+### For local development
+
 ```bash
 # 1. Clone the repo
-git clone https://github.com/your-org/bc-api-reference.git
+git clone https://github.com/JonasDalgasKristiansen/bc-api-reference.git
 cd bc-api-reference
 
 # 2. Copy the environment template
 cp .env.example .env
 
 # 3. Fill in your values (see Authentication section below)
-#    Open .env in your editor and replace the placeholder values
+#    Open .env in your editor and fill in the empty values
 
 # 4. Done — open the resources/ folder for any API you need
 ```
