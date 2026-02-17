@@ -104,35 +104,71 @@ Go to **Settings → Environment Variables** and add the same 5 values.
 
 ## How to Prompt the AI
 
-Once your credentials are saved, you can start building. Always include this line in your prompts:
+Once your credentials are saved, you can start building. Structure your prompts like the examples below — describe the app you want, then add the important instructions block at the end.
 
-> **"Read AI_INSTRUCTIONS.md first. Use the BC API reference from the connected repo. All credentials are stored as platform secrets."**
+### Example Prompts
 
-### Example prompts:
+**Time Registration App:**
+```
+## App
+Create a time registration app that connects to Business Central.
+Main page should have:
+- Choose employee
+- Choose project
+- Select date
+- Enter hours
 
-**Simple:**
-```
-Build a page that shows all my customers from Business Central.
-Read AI_INSTRUCTIONS.md first. Credentials are in Lovable Secrets.
+## Important
+- Read AI_INSTRUCTIONS.md first
+- If in doubt, always re-read the GitHub repo
+- Enable Lovable Cloud
+- Add TenantID, ClientID, ClientSecret, Environment & Company Name as Secrets
+- Add good error logging
+
+## GitHub Repo
+github.com/JonasDalgasKristiansen/bc-api-reference
 ```
 
-**More detailed:**
+**Customer Overview:**
 ```
-Build a time tracking app connected to Business Central.
-Employees can select their name, enter hours worked per day, and submit.
-Read AI_INSTRUCTIONS.md first. Use the BC API reference from the connected repo.
-All credentials are stored as Lovable Secrets.
+## App
+Build a customer overview app connected to Business Central.
+- Show a searchable list of all customers with name, balance, and phone number
+- Click a customer to see their open invoices
+- Show total outstanding amount at the top
+
+## Important
+- Read AI_INSTRUCTIONS.md first
+- If in doubt, always re-read the GitHub repo
+- Enable Lovable Cloud
+- Add TenantID, ClientID, ClientSecret, Environment & Company Name as Secrets
+- Add good error logging
+
+## GitHub Repo
+github.com/JonasDalgasKristiansen/bc-api-reference
 ```
 
-**Advanced:**
+**Sales Dashboard:**
 ```
-Build a sales dashboard that shows:
-- Open sales invoices (count and total amount)
-- A list of recent orders
+## App
+Create a sales dashboard that shows:
+- Total open sales invoices (count and amount)
+- List of recent sales orders
 - A button to post draft invoices
-Read AI_INSTRUCTIONS.md first. Use the BC API reference files.
-Credentials are in Lovable Secrets.
+- A chart showing invoiced amounts per month
+
+## Important
+- Read AI_INSTRUCTIONS.md first
+- If in doubt, always re-read the GitHub repo
+- Enable Lovable Cloud
+- Add TenantID, ClientID, ClientSecret, Environment & Company Name as Secrets
+- Add good error logging
+
+## GitHub Repo
+github.com/JonasDalgasKristiansen/bc-api-reference
 ```
+
+> **Tip:** Always keep the `## Important` and `## GitHub Repo` sections at the bottom of every prompt. The AI needs these to find the documentation and use real data instead of fake demos.
 
 ---
 
