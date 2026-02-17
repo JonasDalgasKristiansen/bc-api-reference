@@ -1,6 +1,93 @@
 # Time Registration Entries
 
-Time registration entries allow employees to log hours worked on jobs/projects or record absences. This is the primary endpoint for time tracking in Business Central. Entries go through an approval workflow (Open → Submitted → Approved/Rejected).
+Time registration entries allow employees to log hours worked on jobs/projects or record absences. This is the primary endpoint for time tracking in Business Central.
+
+---
+
+## ⚠️ CRITICAL: Time Sheets vs Time Registration Entries
+
+Business Central has a **Time Sheet** system that works as follows:
+
+| Concept                    | Description                                                              |
+|----------------------------|--------------------------------------------------------------------------|
+| **Time Sheet (Header)**    | A weekly container per Resource (e.g., TS00007, Week 8, Resource R0010). Created in BC via the **"Create Time Sheets"** batch job. **NOT created via API.** |
+| **Time Sheet Lines**       | Individual work entries (job, task, hours) inside a Time Sheet. These are what you add. |
+| **Time Registration Entry**| API endpoint that adds a **line** to an existing Time Sheet. Each POST adds a line, it does NOT create a new Time Sheet. |
+
+### The Correct Workflow
+
+```
+1. Time Sheets ALREADY EXIST in BC (pre-created weekly by administrator via "Create Time Sheets" batch job)
+2. You use the timeRegistrationEntries API to ADD LINES to the existing Time Sheet
+3. Each POST adds a line (hours on a specific date) to the Time Sheet that covers that date's week
+4. NEVER try to create a Time Sheet header via API — they must already exist in BC
+```
+
+### Common Mistake (WRONG ❌)
+
+Trying to create a new Time Sheet header for each time entry. This results in multiple duplicate Time Sheet records.
+
+### Correct Approach (RIGHT ✅)
+
+1. **Query existing entries** for the employee and current week first
+2. **POST a new entry** with a `date` that falls within an existing Time Sheet's weekly period
+3. BC automatically places the entry as a **new line** inside the matching Time Sheet
+4. To add multiple days of work, POST **one entry per date** — they all become separate lines in the same Time Sheet
+
+### Step-by-Step Example: Add Hours to This Week's Time Sheet
+
+**Step 1 — Confirm the employee exists and get their number:**
+
+```http
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/employees?$filter=number eq 'R0010'&$select=id,number,displayName
+```
+
+**Step 2 — Check what entries already exist for the current week (to avoid duplicates):**
+
+```http
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries?$filter=employeeNumber eq 'R0010' and date ge 2026-02-16 and date le 2026-02-22
+```
+
+**Step 3 — Add hours for a specific date (this becomes a LINE in the existing Time Sheet for that week):**
+
+```http
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries
+Content-Type: application/json
+Authorization: Bearer {access_token}
+
+{
+  "employeeNumber": "R0010",
+  "date": "2026-02-17",
+  "quantity": 8.0,
+  "jobNumber": "J10000",
+  "jobTaskNumber": "JT1000"
+}
+```
+
+**Step 4 — Add another day to the SAME Time Sheet (different date, same week):**
+
+```http
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries
+Content-Type: application/json
+Authorization: Bearer {access_token}
+
+{
+  "employeeNumber": "R0010",
+  "date": "2026-02-18",
+  "quantity": 7.5,
+  "jobNumber": "J10000",
+  "jobTaskNumber": "JT1000"
+}
+```
+
+> Both entries above become lines inside the **same** Time Sheet (the one covering Week 8, 16/02/2026–22/02/2026 for resource R0010).
+
+### What NOT to Do
+
+- ❌ Do NOT post entries with dates across multiple weeks in one batch — each week has a separate Time Sheet
+- ❌ Do NOT try to create Time Sheet headers via the API — use "Create Time Sheets" in BC
+- ❌ Do NOT create one entry per hour — create one entry per date with total `quantity` (hours) for that day
+- ❌ Do NOT assign entries to a Resource number directly — use `employeeNumber` which corresponds to the Resource's linked employee
 
 ---
 
@@ -83,7 +170,9 @@ Authorization: Bearer {access_token}
 Accept: application/json
 ```
 
-### 4. Create a Time Registration Entry
+### 4. Create a Time Registration Entry (Add a Line to Existing Time Sheet)
+
+> **IMPORTANT:** This adds a line to the Time Sheet that covers the specified `date`. The Time Sheet must already exist in BC for that employee's resource and week. Do NOT use this to create a new Time Sheet — Time Sheets are created via the "Create Time Sheets" batch job in the BC client.
 
 ```http
 POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries
@@ -247,8 +336,12 @@ $select=employeeNumber,jobNumber,jobTaskNumber,date,quantity,status
 
 ## Important Notes
 
+- **Time Sheets are NOT created via the API** — they are pre-created in BC via the "Create Time Sheets" batch job. The `timeRegistrationEntries` endpoint only adds LINES to existing Time Sheets.
+- **One entry = one line in an existing Time Sheet.** POST one entry per date. All entries for dates within the same week go into the same Time Sheet automatically.
+- **Never create multiple entries for the same employee + same date + same job** — update the existing entry's `quantity` instead with PATCH.
 - Use `jobNumber` and `jobTaskNumber` (NOT `jobNo` or `jobTaskNo`) — these are the correct API field names
 - Entries with `status` other than `Open` cannot be edited or deleted
 - If both `jobNumber` and `absence` are empty, the entry is a general time entry
-- The `employee` sub-resource endpoint is useful when building per-employee time sheets
+- The `employee` sub-resource endpoint is useful when building per-employee time views
 - `lastModfiedDateTime` has a typo (missing 'i') — this is Microsoft's actual field name, use it as-is
+- The `employeeNumber` field corresponds to the **Resource No.** column shown on the Time Sheet page in BC
