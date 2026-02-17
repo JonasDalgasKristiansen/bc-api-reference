@@ -93,6 +93,17 @@ Common mistakes to avoid:
 - ❌ `lastModifiedDateTime` → ✅ `lastModfiedDateTime` (Microsoft's typo — use it as-is)
 - ❌ `commissionPercent` → ✅ `commisionPercent` (Microsoft's typo — use it as-is)
 - ❌ `companies({guid})` → ✅ `companies(name='{BC_COMPANY_NAME}')`
+- ❌ `/jobs` → ✅ `/projects` (v22.0+) or OData `/Jobs` web service (all versions)
+
+### Projects / Jobs — 404 Warning
+
+The `/projects` endpoint was added in BC v22.0 (2023 wave 1). On older versions it returns **404**.
+
+**Always implement a fallback:** Try `/projects` first. If it returns 404, fall back to the OData web service at:
+```
+https://api.businesscentral.dynamics.com/v2.0/{BC_TENANT_ID}/{BC_ENVIRONMENT}/ODataV4/Company('{BC_COMPANY_NAME}')/Jobs
+```
+See `resources/projects/projects.md` for the full fallback pattern with code example.
 
 ---
 
@@ -132,6 +143,7 @@ When building a web application (e.g., in Lovable or Bolt), you MUST use a backe
 | Authentication setup                     | `README.md` — Authentication section                 |
 | Environment variable names               | `.env.example`                                       |
 | Time registration / time sheets          | `resources/time-tracking/time-registration-entries.md` — READ THE WARNINGS about Time Sheet headers vs lines |
+| Projects / Jobs                          | `resources/projects/projects.md` — ⚠️ `/projects` may 404 on older BC; has OData fallback |
 | Automation (users, extensions)           | `resources/automation/_overview.md`                  |
 
 ---
