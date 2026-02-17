@@ -37,13 +37,14 @@ It is designed for two audiences:
 2. Add your credentials as **Secrets** in the platform (not in code):
    - In **Lovable**: Settings → Secrets → add each variable from `.env.example`
    - In **Bolt**: Settings → Environment Variables
-3. The required secret names are listed in `.env.example` — add these:
+3. The required secret names are listed in `.env.example` — add **all 5** of these **before** prompting:
    - `BC_TENANT_ID` — your Azure / Entra ID tenant ID
    - `BC_CLIENT_ID` — your app registration client ID
    - `BC_CLIENT_SECRET` — your app registration client secret
    - `BC_ENVIRONMENT` — `Production` or `Sandbox`
    - `BC_COMPANY_NAME` — your BC company display name (e.g. `CRONUS Danmark A/S`)
-4. Prompt the AI to build your feature — it will read the API reference from this repo and use your secrets for auth
+4. Include `"Read AI_INSTRUCTIONS.md first"` in your prompt — this tells the AI to ask for credentials, use real API calls, and never build mock apps
+5. Prompt the AI to build your feature — it will read the API reference from this repo and use your secrets for auth
 
 ### For local development
 

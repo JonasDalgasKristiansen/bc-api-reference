@@ -252,6 +252,7 @@ $top=50&$skip=100
 
 ## Quick Links
 
+- [AI Instructions — Read This First](../AI_INSTRUCTIONS.md)
 - [README — Full Setup Guide](../README.md)
 - [How to Use with AI Tools](../HOW_TO_USE_WITH_AI.md)
 - **Customers & Contacts**

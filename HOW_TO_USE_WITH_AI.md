@@ -6,6 +6,8 @@ Every resource file contains complete HTTP examples, realistic JSON payloads, al
 
 > **This is a public repo.** It contains NO credentials. All sensitive values must be added as **platform secrets** (Lovable, Bolt) or a local `.env` file (never committed).
 
+> **`AI_INSTRUCTIONS.md`** contains machine-readable rules for AI tools. When connecting this repo to Lovable/Bolt, the AI will read that file and know to ask you for credentials, use real API calls (not mocks), and use the correct authentication pattern. If the AI still builds a mock app, paste the contents of `AI_INSTRUCTIONS.md` directly into your prompt.
+
 ---
 
 ## General Approach
@@ -55,41 +57,57 @@ These tools can read your open workspace as context automatically.
 
 These tools can connect to a GitHub repo as a knowledge source.
 
-### Setup (one-time)
+### Setup (one-time) — YOU MUST DO THIS BEFORE PROMPTING
+
+> **If you skip this step, Lovable will build a fake mock app with placeholder data instead of a real BC integration.**
 
 1. In Lovable/Bolt, connect this GitHub repo as a knowledge source
 2. Go to **Settings → Secrets** (Lovable) or **Environment Variables** (Bolt)
-3. Add these secrets with your real values:
+3. **Add ALL 5 secrets below with your real values** — the AI will not work without them:
 
-| Secret Name         | Where to find it                                              |
-|---------------------|---------------------------------------------------------------|
-| `BC_TENANT_ID`      | Azure Portal → Entra ID → Overview → Tenant ID               |
-| `BC_CLIENT_ID`      | Azure Portal → App Registrations → Your App → Client ID      |
-| `BC_CLIENT_SECRET`  | Azure Portal → App Registrations → Certificates & Secrets    |
-| `BC_ENVIRONMENT`    | Usually `Production` or `Sandbox`                             |
-| `BC_COMPANY_NAME`   | Your company display name — find it in BC → Settings → Company Information |
+| Secret Name         | Where to find it                                              | Example                                 |
+|---------------------|---------------------------------------------------------------|-----------------------------------------|
+| `BC_TENANT_ID`      | Azure Portal → Entra ID → Overview → Tenant ID               | `164d3b0c-8dca-45a9-9300-17a0e8bc3325`  |
+| `BC_CLIENT_ID`      | Azure Portal → App Registrations → Your App → Client ID      | `a1b2c3d4-...`                          |
+| `BC_CLIENT_SECRET`  | Azure Portal → App Registrations → Certificates & Secrets    | `aBc~dEf...`                            |
+| `BC_ENVIRONMENT`    | Usually `Production` or `Sandbox`                             | `Sandbox`                               |
+| `BC_COMPANY_NAME`   | BC → Settings → Company Information → display name            | `CRONUS Danmark A/S`                    |
 
-### Prompting
+4. **Verify:** After adding secrets, confirm in Settings → Secrets that all 5 appear in the list
+
+### Prompting — ALWAYS include the credential reminder
+
+When prompting Lovable, **always** include a line about credentials. Example:
 
 ```
 "Build a customer list page that fetches customers from the
  Business Central API. Use the API structure from the connected repo.
- Credentials are stored as Lovable Secrets — access them via
- import.meta.env or process.env (never hardcode them).
+ Read AI_INSTRUCTIONS.md for the rules.
+ Credentials are stored as Lovable Secrets (BC_TENANT_ID, BC_CLIENT_ID,
+ BC_CLIENT_SECRET, BC_ENVIRONMENT, BC_COMPANY_NAME) — access them via
+ Deno.env.get() in Supabase Edge Functions. Never hardcode credentials.
+ Never use mock data — make real API calls to Business Central.
  Show: customer number, name, email, balance, and a link to view details."
 ```
 
 **For multi-page apps:**
 
 ```
-"Using the BC API reference repo as context, build a sales management app with:
+"Using the BC API reference repo as context, build a sales management app.
+ Read AI_INSTRUCTIONS.md first — follow all rules.
+ All BC credentials are configured as Lovable Secrets.
+ Use Supabase Edge Functions for server-side API calls (client_secret
+ must never be exposed to the browser).
+ Build:
  - A dashboard showing open quotes, orders, and invoices counts
  - A sales invoices list page with status filters
  - A detail page for each invoice showing line items
  - A 'Post Invoice' button that calls the bound action
- All API shapes and auth are defined in the repo.
+ All API shapes are defined in the connected repo's resource files.
  All credentials come from platform secrets (never hardcoded)."
 ```
+
+> **If Lovable still creates a mock app:** Copy the full contents of `AI_INSTRUCTIONS.md` and paste it directly into your Lovable prompt. This forces the AI to read the rules even if it didn't pick them up from the repo connection.
 
 ---
 
