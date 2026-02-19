@@ -11,8 +11,8 @@ Business Central has a **Time Sheet** system that works as follows:
 | Concept                    | Description                                                              |
 |----------------------------|--------------------------------------------------------------------------|
 | **Time Sheet (Header)**    | A weekly container per Resource (e.g., TS00007, Week 8, Resource R0010). Created in BC via the **"Create Time Sheets"** batch job. **NOT created via API.** |
-| **Time Sheet Lines**       | Individual work entries (job, task, hours) inside a Time Sheet. These are what you add. |
-| **Time Registration Entry**| API endpoint that adds a **line** to an existing Time Sheet. Each POST adds a line, it does NOT create a new Time Sheet. |
+| **Time Sheet Lines**       | Individual work entries (job, task, hours) inside a Time Sheet. These are what you add via the API. |
+| **Time Registration Entry**| API endpoint that adds a **line** to an existing Time Sheet. Each POST adds a line — it does NOT create a new Time Sheet. |
 
 ### The Correct Workflow
 
@@ -34,76 +34,76 @@ Trying to create a new Time Sheet header for each time entry. This results in mu
 3. BC automatically places the entry as a **new line** inside the matching Time Sheet
 4. To add multiple days of work, POST **one entry per date** — they all become separate lines in the same Time Sheet
 
-### Step-by-Step Example: Add Hours to This Week's Time Sheet
+---
 
-**Step 1 — Confirm the employee exists and get their number:**
+## Employee-to-Resource Mapping
 
-```http
-GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/employees?$filter=number eq 'R0010'&$select=id,number,displayName
-```
+In BC, **Employees** and **Resources** are two separate tables. Time Sheets belong to a **Resource**, but the API uses `employeeNumber`. The mapping works like this:
 
-**Step 2 — Check what entries already exist for the current week (to avoid duplicates):**
+| Concept | Table | Example | Used Where |
+|---------|-------|---------|------------|
+| **Resource No.** | Resource | `R0010` | Time Sheet header, Time Sheet page in BC |
+| **Employee Number** | Employee | `R0010` | API `employeeNumber` field |
 
-```http
-GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries?$filter=employeeNumber eq 'R0010' and date ge 2026-02-16 and date le 2026-02-22
-```
+The employee must be linked to a resource in BC (via the Resource card → Related → Employee Link). When you POST with `employeeNumber`, BC resolves the linked resource and places the entry in that resource's Time Sheet.
 
-**Step 3 — Add hours for a specific date (this becomes a LINE in the existing Time Sheet for that week):**
-
-```http
-POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries
-Content-Type: application/json
-Authorization: Bearer {access_token}
-
-{
-  "employeeNumber": "R0010",
-  "date": "2026-02-17",
-  "quantity": 8.0,
-  "jobNumber": "J10000",
-  "jobTaskNumber": "JT1000"
-}
-```
-
-**Step 4 — Add another day to the SAME Time Sheet (different date, same week):**
+### How to verify the mapping
 
 ```http
-POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries
-Content-Type: application/json
-Authorization: Bearer {access_token}
-
-{
-  "employeeNumber": "R0010",
-  "date": "2026-02-18",
-  "quantity": 7.5,
-  "jobNumber": "J10000",
-  "jobTaskNumber": "JT1000"
-}
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/employees?$select=id,number,displayName
 ```
 
-> Both entries above become lines inside the **same** Time Sheet (the one covering Week 8, 16/02/2026–22/02/2026 for resource R0010).
+The `number` field returned here is the value you use as `employeeNumber` in time entry POSTs.
 
-### Time Sheet Fields vs API Fields
+---
+
+## Time Sheet Fields vs API Fields
 
 The Time Sheet page in BC shows several columns. **Not all of them are available in the API:**
 
-| Time Sheet Column        | API Field          | Can You Set It? | Notes |
-|--------------------------|--------------------|--------------------|-------|
-| **Type**                 | *(auto-determined)* | ❌ Not settable    | BC sets this automatically: `Resource` if no job/absence, `Job` if `jobNumber` is set, `Absence` if `absence` is set |
-| **Description**          | —                  | ❌ Not in API      | The Time Sheet Line description field is not exposed in the standard v2.0 API |
-| **Project No.**          | `jobNumber`        | ✅ Yes             | Sets the project/job for this entry. Also auto-sets Type to `Job` |
-| **Project Task No.**     | `jobTaskNumber`    | ✅ Yes             | Task within the project. Requires `jobNumber` to be set |
-| **Cause of Absence Code**| `absence`          | ✅ Yes             | Sets the absence reason (e.g., `"Vacation"`, `"Sick"`). Also auto-sets Type to `Absence` |
-| **Chargeable**           | —                  | ❌ Not in API      | The chargeable flag is not exposed in the standard v2.0 API |
-| **Work Code**            | —                  | ❌ Not in API      | Work codes are not exposed in the standard v2.0 API |
+| Time Sheet Column         | API Field            | Can You Set It? | Notes |
+|---------------------------|----------------------|-----------------|-------|
+| **Type**                  | *(auto-determined)*  | ❌ Not settable  | BC sets this automatically based on what fields you include (see below) |
+| **Status**                | `status`             | ❌ Read-only     | `Open`, `Submitted`, `Rejected`, `Approved` — can only read, not change via API |
+| **Description**           | —                    | ❌ Not in API    | The Time Sheet Line description is not exposed in the `timeRegistrationEntries` entity |
+| **Project No.**           | `jobNumber`          | ✅ Yes           | Sets the project/job. Also auto-sets Type to `Job` |
+| **Project Task No.**      | `jobTaskNumber`      | ✅ Yes           | Task within the project. Requires `jobNumber` to be set |
+| **Cause of Absence Code** | `absence`            | ✅ Yes           | Sets the absence reason. Also auto-sets Type to `Absence` |
+| **Chargeable**            | —                    | ❌ Not in API    | The chargeable flag is not exposed in the standard v2.0 API |
+| **Work Code**             | —                    | ❌ Not in API    | Work codes are not exposed in the standard v2.0 API |
+| **Mon–Sun hours**         | `date` + `quantity`  | ✅ Yes           | Each day is a separate POST with a `date` and `quantity` (hours) |
+| **Total**                 | *(calculated)*       | ❌ Read-only     | Sum of all entries for the week — calculated by BC |
 
-> **Why Lovable/AI can't fill in Description, Chargeable, or Work Code:** These fields exist on the BC Time Sheet Line table but Microsoft's standard `timeRegistrationEntries` API entity simply does not include them. Only the fields listed in the [Field Definitions](#field-definitions) section below are available.
+> **Why AI tools can't fill in Description, Chargeable, or Work Code:** These fields exist in BC's Time Sheet Line table but Microsoft's standard `timeRegistrationEntries` API entity simply does not include them. Only the fields listed in the [Field Definitions](#field-definitions) section below are available.
 
-> **How the Type column works:** You don't set it directly. BC determines it based on what you include in the POST body:
-> - Set `jobNumber` → Type becomes **Job**
-> - Set `absence` → Type becomes **Absence**
-> - Set neither → Type becomes **Resource** (general hours)
+### How the Type Column Works
 
-### What NOT to Do
+You don't set `Type` directly. BC determines it based on what you include in the POST body:
+
+| What You Include | Type Becomes | Example |
+|------------------|-------------|---------|
+| `jobNumber` (with or without `jobTaskNumber`) | **Job** | `{ "employeeNumber": "R0010", "jobNumber": "J10000", "date": "2026-02-17", "quantity": 8 }` |
+| `absence` | **Absence** | `{ "employeeNumber": "R0010", "absence": "Vacation", "date": "2026-02-17", "quantity": 8 }` |
+| Neither `jobNumber` nor `absence` | **Resource** | `{ "employeeNumber": "R0010", "date": "2026-02-17", "quantity": 8 }` |
+
+> **Do NOT set both `jobNumber` and `absence`** on the same entry — use one or the other.
+
+---
+
+## Status Workflow
+
+| Status       | Description                                    | Can Edit? | Can Delete? |
+|--------------|------------------------------------------------|-----------|-------------|
+| `Open`       | Entry is being prepared                        | ✅ Yes    | ✅ Yes      |
+| `Submitted`  | Submitted for approval                         | ❌ No     | ❌ No       |
+| `Rejected`   | Rejected by approver (can be reopened in BC)   | ❌ No     | ❌ No       |
+| `Approved`   | Approved by manager                            | ❌ No     | ❌ No       |
+
+> **Status transitions happen in BC, not via the API.** The API cannot submit, approve, or reject entries. Users must do this from the Time Sheet page in Business Central.
+
+---
+
+## What NOT to Do
 
 - ❌ Do NOT POST to `/employees({id})/timeRegistrationEntries` — always POST to the **top-level** `/timeRegistrationEntries`
 - ❌ Do NOT use `employeeId` (GUID) in the POST body — use `employeeNumber` (short code like `"MH"`, `"R0010"`)
@@ -111,6 +111,9 @@ The Time Sheet page in BC shows several columns. **Not all of them are available
 - ❌ Do NOT try to create Time Sheet headers via the API — use "Create Time Sheets" in BC
 - ❌ Do NOT create one entry per hour — create one entry per date with total `quantity` (hours) for that day
 - ❌ Do NOT assign entries to a Resource number directly — use `employeeNumber` which corresponds to the Resource's linked employee
+- ❌ Do NOT set both `jobNumber` and `absence` on the same entry
+- ❌ Do NOT try to set `description`, `chargeable`, or `workCode` — these fields are not in the API
+- ❌ Do NOT try to change `status` via PATCH — status transitions are done in BC's Time Sheet UI
 
 ---
 
@@ -134,17 +137,6 @@ GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/employees({employeeId}
 
 ---
 
-## Status Values
-
-| Status       | Description                                    |
-|--------------|------------------------------------------------|
-| `Open`       | Entry is being prepared, editable              |
-| `Submitted`  | Entry has been submitted for approval          |
-| `Rejected`   | Entry was rejected by approver                 |
-| `Approved`   | Entry has been approved                        |
-
----
-
 ## Operations
 
 ### 1. List All Time Registration Entries
@@ -164,18 +156,18 @@ Accept: application/json
       "@odata.etag": "W/\"JzE5OzEyMzQ1Njc4OTA7Jw==\"",
       "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
       "employeeId": "d1e2f3a4-b5c6-7890-1234-567890abcdef",
-      "employeeNumber": "EMP001",
+      "employeeNumber": "R0010",
       "jobId": "00000000-0000-0000-0000-000000000000",
       "jobNumber": "J10000",
       "jobTaskNumber": "JT1000",
       "absence": "",
       "lineNumber": 10000,
-      "date": "2024-06-15",
+      "date": "2026-02-17",
       "quantity": 7.5,
-      "status": "Approved",
+      "status": "Open",
       "unitOfMeasureId": "b2c3d4e5-f6a7-8901-bcde-f23456789012",
       "unitOfMeasureCode": "HOUR",
-      "lastModfiedDateTime": "2024-06-15T14:30:00Z"
+      "lastModfiedDateTime": "2026-02-17T14:30:00Z"
     }
   ]
 }
@@ -201,12 +193,13 @@ Authorization: Bearer {access_token}
 Accept: application/json
 ```
 
-### 4. Create a Time Registration Entry (Add a Line to Existing Time Sheet)
+### 4. Create — Basic Time Entry (General Hours, No Project)
 
 > **IMPORTANT — READ ALL OF THIS:**
 > - **URL:** Always POST to the **top-level** `/timeRegistrationEntries` endpoint. NEVER POST to `/employees({id})/timeRegistrationEntries`.
-> - **Employee field:** Use `employeeNumber` (the short code like `"MH"`, `"R0010"`, `"EMP001"`) — NOT `employeeId` (a GUID). If you pass `employeeId`, BC returns: *"The Employee does not exist. Identification fields and values: No.=''"*
+> - **Employee field:** Use `employeeNumber` (the short code like `"MH"`, `"R0010"`) — NOT `employeeId` (a GUID). If you pass `employeeId`, BC returns: *"The Employee does not exist. Identification fields and values: No.=''"*
 > - **Time Sheet:** The Time Sheet must already exist in BC for that employee's resource and week. Do NOT try to create a new Time Sheet via the API.
+> - **Date:** Must fall within the date range of an existing Time Sheet for this employee's resource. If no Time Sheet covers the date, you'll get an error.
 
 ```http
 POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries
@@ -214,7 +207,7 @@ Authorization: Bearer {access_token}
 Content-Type: application/json
 
 {
-  "employeeNumber": "MH",
+  "employeeNumber": "R0010",
   "date": "2026-02-17",
   "quantity": 8.0
 }
@@ -227,22 +220,24 @@ Content-Type: application/json
   "@odata.etag": "W/\"JzIwOzEyMzQ1Njc4OTA7Jw==\"",
   "id": "c3d4e5f6-a7b8-9012-cdef-345678901234",
   "employeeId": "d1e2f3a4-b5c6-7890-1234-567890abcdef",
-  "employeeNumber": "EMP001",
-  "jobId": "e4f5a6b7-c8d9-0123-efab-456789012345",
-  "jobNumber": "J10000",
-  "jobTaskNumber": "JT1000",
+  "employeeNumber": "R0010",
+  "jobId": "00000000-0000-0000-0000-000000000000",
+  "jobNumber": "",
+  "jobTaskNumber": "",
   "absence": "",
-  "lineNumber": 20000,
-  "date": "2024-06-17",
+  "lineNumber": 10000,
+  "date": "2026-02-17",
   "quantity": 8.0,
   "status": "Open",
   "unitOfMeasureId": "b2c3d4e5-f6a7-8901-bcde-f23456789012",
   "unitOfMeasureCode": "HOUR",
-  "lastModfiedDateTime": "2024-06-17T09:00:00Z"
+  "lastModfiedDateTime": "2026-02-17T09:00:00Z"
 }
 ```
 
-### 5. Create a Time Entry for Absence
+> This creates a **Resource** type line (no project, no absence).
+
+### 5. Create — Time Entry with Project & Task
 
 ```http
 POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries
@@ -250,20 +245,136 @@ Authorization: Bearer {access_token}
 Content-Type: application/json
 
 {
-  "employeeNumber": "EMP001",
+  "employeeNumber": "R0010",
+  "date": "2026-02-17",
+  "quantity": 8.0,
+  "jobNumber": "J10000",
+  "jobTaskNumber": "JT1000"
+}
+```
+
+**Response:** `201 Created` — the entry will have Type = **Job** in the Time Sheet.
+
+> **To find valid project and task numbers**, see `resources/projects/projects.md` for projects and `resources/projects/job-tasks.md` for job tasks.
+
+### 6. Create — Absence Entry
+
+```http
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries
+Authorization: Bearer {access_token}
+Content-Type: application/json
+
+{
+  "employeeNumber": "R0010",
   "absence": "Vacation",
-  "date": "2024-06-18",
+  "date": "2026-02-18",
   "quantity": 8.0
 }
 ```
 
-### 6. Update a Time Registration Entry
+**Response:** `201 Created` — the entry will have Type = **Absence** in the Time Sheet.
+
+> **Common absence codes:** `"Vacation"`, `"Sick"`, `"Personal"`, `"Training"`. The exact codes available depend on your BC setup — check the **Causes of Absence** page in BC.
+
+### 7. Create — Full Work Week (Monday–Friday)
+
+To register a full work week, POST **one entry per day**. All entries for dates in the same week automatically go into the same Time Sheet.
+
+```http
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries
+Authorization: Bearer {access_token}
+Content-Type: application/json
+
+{"employeeNumber": "R0010", "date": "2026-02-16", "quantity": 8.0, "jobNumber": "J10000", "jobTaskNumber": "JT1000"}
+```
+
+```http
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries
+Authorization: Bearer {access_token}
+Content-Type: application/json
+
+{"employeeNumber": "R0010", "date": "2026-02-17", "quantity": 8.0, "jobNumber": "J10000", "jobTaskNumber": "JT1000"}
+```
+
+```http
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries
+Authorization: Bearer {access_token}
+Content-Type: application/json
+
+{"employeeNumber": "R0010", "date": "2026-02-18", "quantity": 8.0, "jobNumber": "J10000", "jobTaskNumber": "JT1000"}
+```
+
+```http
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries
+Authorization: Bearer {access_token}
+Content-Type: application/json
+
+{"employeeNumber": "R0010", "date": "2026-02-19", "quantity": 8.0, "jobNumber": "J10000", "jobTaskNumber": "JT1000"}
+```
+
+```http
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries
+Authorization: Bearer {access_token}
+Content-Type: application/json
+
+{"employeeNumber": "R0010", "date": "2026-02-20", "quantity": 7.5, "jobNumber": "J10000", "jobTaskNumber": "JT1000"}
+```
+
+> All 5 entries become lines inside the **same** Time Sheet (Week 8, 16/02/2026–22/02/2026, Resource R0010). You **must** send one POST per day — there is no batch/array endpoint.
+
+### 8. Step-by-Step: Complete Time Registration Flow
+
+This is the recommended flow for a time registration app:
+
+**Step 1 — Get the list of employees (for a "Choose Employee" dropdown):**
+
+```http
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/employees?$select=id,number,displayName
+```
+
+**Step 2 — Get the list of projects (for a "Choose Project" dropdown):**
+
+```http
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/projects?$select=id,number,displayName
+```
+
+> If this returns 404, use the OData fallback — see `resources/projects/projects.md`.
+
+**Step 3 — Get job tasks for the selected project (for a "Choose Task" dropdown):**
+
+> Job tasks are NOT in the standard API. Use OData — see `resources/projects/job-tasks.md`.
+
+**Step 4 — Check existing entries for the selected employee & week (to avoid duplicates):**
+
+```http
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries?$filter=employeeNumber eq 'R0010' and date ge 2026-02-16 and date le 2026-02-22&$select=id,employeeNumber,jobNumber,jobTaskNumber,date,quantity,status
+```
+
+**Step 5 — Create the time entry:**
+
+```http
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries
+Authorization: Bearer {access_token}
+Content-Type: application/json
+
+{
+  "employeeNumber": "R0010",
+  "date": "2026-02-17",
+  "quantity": 8.0,
+  "jobNumber": "J10000",
+  "jobTaskNumber": "JT1000"
+}
+```
+
+### 9. Update a Time Registration Entry
+
+> Only entries with `status` = `Open` can be updated. You need the `id` and the `@odata.etag` from a GET request.
 
 ```http
 PATCH {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries({id})
 Authorization: Bearer {access_token}
 Content-Type: application/json
-If-Match: {etag}
+If-Match: W/"JzIwOzEyMzQ1Njc4OTA7Jw=="
 
 {
   "quantity": 6.5
@@ -272,38 +383,58 @@ If-Match: {etag}
 
 **Response:** `200 OK` with updated entity.
 
-### 7. Delete a Time Registration Entry
+> You can also update `jobNumber`, `jobTaskNumber`, `absence`, and `date` on open entries.
+
+### 10. Delete a Time Registration Entry
+
+> Only entries with `status` = `Open` can be deleted.
 
 ```http
 DELETE {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries({id})
 Authorization: Bearer {access_token}
-If-Match: {etag}
+If-Match: W/"JzIwOzEyMzQ1Njc4OTA7Jw=="
 ```
 
 **Response:** `204 No Content`
 
-> Only entries with `status` = `Open` can be deleted.
+---
+
+## Date Handling
+
+- **Date format:** Always `YYYY-MM-DD` (e.g., `2026-02-17`)
+- **The date must fall within an existing Time Sheet's week range.** If no Time Sheet exists that covers the given date, BC will return an error.
+- **BC Time Sheets are weekly** — typically Monday to Sunday. All entries with dates in the same week go into the same Time Sheet.
+- **To find what week a Time Sheet covers:** Check the Time Sheet's start date and it spans 7 days from there.
+
+### How to verify a Time Sheet exists for a given week
+
+```http
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries?$filter=employeeNumber eq 'R0010' and date ge 2026-02-16 and date le 2026-02-22&$top=1
+```
+
+If this returns results, a Time Sheet exists for that employee's resource and week. If it returns empty and a POST for that date also fails, the Time Sheet hasn't been created yet in BC.
 
 ---
 
 ## Field Definitions
 
-| Field                  | Type     | Editable | Description                                       |
-|------------------------|----------|----------|---------------------------------------------------|
-| `id`                   | GUID     | No       | Unique identifier                                 |
-| `employeeId`           | GUID     | No       | Employee GUID (read-only — returned in response, do NOT send in POST body) |
-| `employeeNumber`       | string   | Yes      | **USE THIS** — Employee number/code (e.g., "MH", "R0010"). Always use this when creating entries. |
-| `jobId`                | GUID     | No       | Project/job identifier (read-only, set via jobNumber) |
-| `jobNumber`            | string   | Yes      | Project/job number                                |
-| `jobTaskNumber`        | string   | Yes      | Job task number within the project                |
-| `absence`              | string   | Yes      | Absence code (e.g., "Vacation", "Sick")           |
-| `lineNumber`           | integer  | No       | Line number (auto-assigned)                       |
-| `date`                 | date     | Yes      | Date the time was worked                          |
-| `quantity`             | decimal  | Yes      | Number of hours                                   |
-| `status`               | enum     | No       | Open, Submitted, Rejected, Approved               |
-| `unitOfMeasureId`      | GUID     | Yes      | Unit of measure identifier                        |
-| `unitOfMeasureCode`    | string   | Yes      | Unit of measure code (e.g., "HOUR")               |
-| `lastModfiedDateTime`  | datetime | No       | Last modified timestamp (note: typo is intentional) |
+| Field                  | Type     | Editable | Example Value | Description |
+|------------------------|----------|----------|---------------|-------------|
+| `id`                   | GUID     | No       | `"a1b2c3d4-e5f6-..."` | Unique identifier |
+| `employeeId`           | GUID     | No       | `"d1e2f3a4-b5c6-..."` | Employee GUID (read-only — returned in response, do NOT send in POST body) |
+| `employeeNumber`       | string   | **Yes** ✅ | `"R0010"` | **USE THIS** — Employee number/code. Always use this when creating entries. |
+| `jobId`                | GUID     | No       | `"e4f5a6b7-c8d9-..."` | Project/job GUID (read-only, auto-set via `jobNumber`) |
+| `jobNumber`            | string   | **Yes** ✅ | `"J10000"` | Project/job number — sets Type to **Job** |
+| `jobTaskNumber`        | string   | **Yes** ✅ | `"JT1000"` | Job task number within the project |
+| `absence`              | string   | **Yes** ✅ | `"Vacation"` | Absence code — sets Type to **Absence** |
+| `lineNumber`           | integer  | No       | `10000` | Auto-assigned line number in the Time Sheet |
+| `date`                 | date     | **Yes** ✅ | `"2026-02-17"` | Date the time was worked (YYYY-MM-DD) |
+| `quantity`             | decimal  | **Yes** ✅ | `8.0` | Number of hours |
+| `status`               | enum     | No       | `"Open"` | `Open`, `Submitted`, `Rejected`, `Approved` |
+| `unitOfMeasureId`      | GUID     | Yes      | `"b2c3d4e5-f6a7-..."` | Unit of measure GUID |
+| `unitOfMeasureCode`    | string   | Yes      | `"HOUR"` | Unit of measure code |
+| `dimensions`           | array    | No       | *(sub-resource)* | Access via `/timeRegistrationEntries({id})/dimensionSetLines` |
+| `lastModfiedDateTime`  | datetime | No       | `"2026-02-17T09:00:00Z"` | Last modified (note: typo `Modfied` is intentional — Microsoft's API) |
 
 ---
 
@@ -320,13 +451,13 @@ If-Match: {etag}
 ### Filter by employee
 
 ```
-$filter=employeeNumber eq 'EMP001'
+$filter=employeeNumber eq 'R0010'
 ```
 
-### Filter by date range
+### Filter by date range (one week)
 
 ```
-$filter=date ge 2024-06-01 and date le 2024-06-30
+$filter=date ge 2026-02-16 and date le 2026-02-22
 ```
 
 ### Filter by project
@@ -341,28 +472,44 @@ $filter=jobNumber eq 'J10000'
 $filter=status eq 'Open'
 ```
 
-### Get approved entries for a specific week
+### Get all entries for an employee in a specific week
 
 ```
-$filter=date ge 2024-06-17 and date le 2024-06-21 and status eq 'Approved'
+$filter=employeeNumber eq 'R0010' and date ge 2026-02-16 and date le 2026-02-22
 ```
 
-### Select specific fields
+### Get entries with hours > 0
 
 ```
-$select=employeeNumber,jobNumber,jobTaskNumber,date,quantity,status
+$filter=quantity gt 0
+```
+
+### Combine: employee + week + project
+
+```
+$filter=employeeNumber eq 'R0010' and date ge 2026-02-16 and date le 2026-02-22 and jobNumber eq 'J10000'
+```
+
+### Select specific fields (for performance)
+
+```
+$select=id,employeeNumber,jobNumber,jobTaskNumber,date,quantity,status
 ```
 
 ---
 
-## Common Errors
+## Troubleshooting
 
-| Status | Error                  | Cause & Resolution                                                                 |
-|--------|------------------------|------------------------------------------------------------------------------------|
-| `401`  | Unauthorized           | Access token is missing, expired, or invalid. Request a new token.                 |
-| `404`  | Not Found              | The entry or employee does not exist. Verify the IDs.                              |
-| `400`  | Bad Request            | Invalid field values — check that date format is YYYY-MM-DD, quantity is numeric.  |
-| `409`  | Conflict               | ETag mismatch — the record was modified since your last GET. Fetch and retry.      |
+| Problem | Error Message | Cause | Fix |
+|---------|--------------|-------|-----|
+| Employee not found | *"The Employee does not exist. Identification fields and values: No.=''"* | Used `employeeId` (GUID) instead of `employeeNumber` | Use `employeeNumber` (e.g., `"R0010"`) in the POST body, NOT `employeeId` |
+| Employee not found | *"The Employee does not exist. Identification fields and values: No.='XYZ'"* | The employee number doesn't exist in BC | Verify with `GET .../employees?$filter=number eq 'XYZ'` |
+| Date has no Time Sheet | *"There is no Time Sheet for this Resource and Date"* or similar | No Time Sheet was created for that week | The BC admin must run "Create Time Sheets" batch job in BC for that date range |
+| Can't edit entry | *"The record is not open"* or 400 error | Trying to PATCH an entry that's Submitted/Approved | You can only edit entries with `status` = `Open` |
+| HTML response instead of JSON | HTML page returned | Missing `Accept: application/json` header | Add `Accept: application/json` to all GET requests |
+| 404 on POST | 404 Not Found | POSTing to `/employees({id})/timeRegistrationEntries` | POST to the **top-level** `/timeRegistrationEntries` endpoint instead |
+| Duplicate entry | 400 or silent duplicate | Entry already exists for that employee + date + job | GET first to check, then either skip or PATCH the existing entry's `quantity` |
+| Wrong hours created | Multiple entries for same day | Created one entry per hour instead of one per day | Create ONE entry per date with total hours in `quantity` |
 
 ---
 
@@ -371,11 +518,12 @@ $select=employeeNumber,jobNumber,jobTaskNumber,date,quantity,status
 - **Time Sheets are NOT created via the API** — they are pre-created in BC via the "Create Time Sheets" batch job. The `timeRegistrationEntries` endpoint only adds LINES to existing Time Sheets.
 - **One entry = one line in an existing Time Sheet.** POST one entry per date. All entries for dates within the same week go into the same Time Sheet automatically.
 - **Never create multiple entries for the same employee + same date + same job** — update the existing entry's `quantity` instead with PATCH.
-- Use `jobNumber` and `jobTaskNumber` (NOT `jobNo` or `jobTaskNo`) — these are the correct API field names
-- Entries with `status` other than `Open` cannot be edited or deleted
-- If both `jobNumber` and `absence` are empty, the entry is a general time entry
-- The `employee` sub-resource endpoint is useful when building per-employee time views
-- `lastModfiedDateTime` has a typo (missing 'i') — this is Microsoft's actual field name, use it as-is
-- The `employeeNumber` field corresponds to the **Resource No.** column shown on the Time Sheet page in BC
+- Use `jobNumber` and `jobTaskNumber` (NOT `jobNo` or `jobTaskNo`) — these are the correct API field names.
+- Entries with `status` other than `Open` cannot be edited or deleted.
+- Status transitions (Submit, Approve, Reject) happen in BC's Time Sheet page — NOT via the API.
+- If both `jobNumber` and `absence` are empty, the entry is a general **Resource** type entry.
+- `lastModfiedDateTime` has a typo (missing 'i') — this is Microsoft's actual field name, use it as-is.
+- The `employeeNumber` field corresponds to the **Resource No.** column shown on the Time Sheet page in BC.
 - **Fields NOT available in the API:** Description, Chargeable, and Work Code are visible on the BC Time Sheet page but are NOT exposed in the `timeRegistrationEntries` API. You cannot read or write these fields via the standard v2.0 API.
-- **The Type field is auto-determined:** You don't set it — BC infers it from `jobNumber` (→ Job type) or `absence` (→ Absence type) or neither (→ Resource type)
+- **The Type field is auto-determined:** You don't set it — BC infers it from `jobNumber` (→ Job type) or `absence` (→ Absence type) or neither (→ Resource type).
+- For **Job Tasks**, see `resources/projects/job-tasks.md` — these require OData web services (not in the standard v2.0 API).

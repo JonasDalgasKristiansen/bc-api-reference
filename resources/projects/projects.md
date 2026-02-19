@@ -241,3 +241,12 @@ async function getProjects(): Promise<any[]> {
 - Use `jobNumber` in `timeRegistrationEntries` to reference a project by its number
 - The `projects` endpoint (when available) has very few fields — most project detail is managed in the BC web client
 - OData web service field names use underscores instead of spaces (e.g., `Bill_to_Customer_No`) and are NOT camelCase
+
+---
+
+## Related Resources
+
+| Resource | File | Description |
+|----------|------|-------------|
+| Job Tasks | `resources/projects/job-tasks.md` | Task breakdown within a project (OData only — requires web service setup) |
+| Time Registration | `resources/time-tracking/time-registration-entries.md` | Log hours against projects using `jobNumber` and `jobTaskNumber` |

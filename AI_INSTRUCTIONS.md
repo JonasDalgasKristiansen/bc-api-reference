@@ -107,6 +107,20 @@ When creating time entries:
 - The employee sub-resource endpoint is **GET-only** — use it only to read entries for a specific employee
 - **The Type field is auto-determined** — you don't set it. BC infers it: `jobNumber` → Job, `absence` → Absence, neither → Resource
 - **These Time Sheet fields are NOT in the API:** Description, Chargeable, and Work Code. Do not try to set them — they are not exposed in the standard v2.0 `timeRegistrationEntries` entity.
+- **Status is read-only** — you cannot submit, approve, or reject entries via the API. This is done in BC's Time Sheet UI.
+- **One entry per date** — do not create one entry per hour. Create one entry per date with total hours in `quantity`.
+- **Employee = Resource** — `employeeNumber` in the API corresponds to the Resource No. shown in BC Time Sheets. The employee must be linked to a resource in BC.
+
+### Time Registration — Complete App Flow
+
+For a time registration app, implement these steps in order:
+1. `GET /employees?$select=id,number,displayName` → populate employee dropdown
+2. `GET /projects?$select=id,number,displayName` → populate project dropdown (use OData `/Jobs` fallback if 404)
+3. **Job Tasks via OData** (NOT standard API): `GET .../ODataV4/Company('{name}')/JobTasks?$filter=Job_No eq '{projectNo}' and Job_Task_Type eq 'Posting'` — **must include `Accept: application/json` header**. Map `Job_Task_No` → `jobTaskNumber`
+4. `GET /timeRegistrationEntries?$filter=employeeNumber eq '{no}' and date ge {weekStart} and date le {weekEnd}` → check existing entries
+5. `POST /timeRegistrationEntries` with `{ "employeeNumber", "date", "quantity", "jobNumber", "jobTaskNumber" }` → create entry
+
+See `resources/time-tracking/time-registration-entries.md` for full details and `resources/projects/job-tasks.md` for Job Tasks setup.
 
 ### Projects / Jobs — 404 Warning
 

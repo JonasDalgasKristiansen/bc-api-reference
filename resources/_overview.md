@@ -100,6 +100,7 @@ Tokens expire after 1 hour. Cache and refresh automatically. See [README.md](../
 | Finance     | customerSales                   | `/companies(name='{{BC_COMPANY_NAME}}')/customerSales`                                      | GET                        | Read-only aggregated sales        |
 | Finance     | vendorPurchases                 | `/companies(name='{{BC_COMPANY_NAME}}')/vendorPurchases`                                    | GET                        | Read-only aggregated purchases    |
 | Projects    | projects                        | `/companies(name='{{BC_COMPANY_NAME}}')/projects`                                           | GET, POST, PATCH, DELETE   | ⚠️ v22.0+ only — returns 404 on older BC. Use OData `/Jobs` as fallback. See [projects.md](projects/projects.md) |
+| Projects    | JobTasks *(OData)*              | `.../ODataV4/Company('{name}')/JobTasks`                                                    | GET (OData)                | ⚠️ OData only — requires web service setup. Must send `Accept: application/json`. See [job-tasks.md](projects/job-tasks.md) |
 | Time        | timeRegistrationEntries         | `/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries`                            | GET, POST, PATCH, DELETE   | Status workflow: Open→Submitted→Approved |
 | Time        | employees/timeRegistrationEntries | `/companies(name='{{BC_COMPANY_NAME}}')/employees({empId})/timeRegistrationEntries`       | GET only                   | Read-only sub-resource. Always POST to top-level `/timeRegistrationEntries` with `employeeNumber` in body |
 | Employees   | employees                       | `/companies(name='{{BC_COMPANY_NAME}}')/employees`                                          | GET, POST, PATCH, DELETE   |                                   |
@@ -286,6 +287,7 @@ $top=50&$skip=100
   - [Financial Reports](finance/financial-reports.md) (Balance Sheet, Income Statement, Trial Balance, Cash Flow, Aging, etc.)
 - **Projects & Time**
   - [Projects](projects/projects.md)
+  - [Job Tasks](projects/job-tasks.md) *(OData — requires web service setup)*
   - [Time Registration Entries](time-tracking/time-registration-entries.md)
 - **Employees**
   - [Employees](employees/employees.md)
