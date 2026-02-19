@@ -82,6 +82,27 @@ Authorization: Bearer {access_token}
 
 > Both entries above become lines inside the **same** Time Sheet (the one covering Week 8, 16/02/2026–22/02/2026 for resource R0010).
 
+### Time Sheet Fields vs API Fields
+
+The Time Sheet page in BC shows several columns. **Not all of them are available in the API:**
+
+| Time Sheet Column        | API Field          | Can You Set It? | Notes |
+|--------------------------|--------------------|--------------------|-------|
+| **Type**                 | *(auto-determined)* | ❌ Not settable    | BC sets this automatically: `Resource` if no job/absence, `Job` if `jobNumber` is set, `Absence` if `absence` is set |
+| **Description**          | —                  | ❌ Not in API      | The Time Sheet Line description field is not exposed in the standard v2.0 API |
+| **Project No.**          | `jobNumber`        | ✅ Yes             | Sets the project/job for this entry. Also auto-sets Type to `Job` |
+| **Project Task No.**     | `jobTaskNumber`    | ✅ Yes             | Task within the project. Requires `jobNumber` to be set |
+| **Cause of Absence Code**| `absence`          | ✅ Yes             | Sets the absence reason (e.g., `"Vacation"`, `"Sick"`). Also auto-sets Type to `Absence` |
+| **Chargeable**           | —                  | ❌ Not in API      | The chargeable flag is not exposed in the standard v2.0 API |
+| **Work Code**            | —                  | ❌ Not in API      | Work codes are not exposed in the standard v2.0 API |
+
+> **Why Lovable/AI can't fill in Description, Chargeable, or Work Code:** These fields exist on the BC Time Sheet Line table but Microsoft's standard `timeRegistrationEntries` API entity simply does not include them. Only the fields listed in the [Field Definitions](#field-definitions) section below are available.
+
+> **How the Type column works:** You don't set it directly. BC determines it based on what you include in the POST body:
+> - Set `jobNumber` → Type becomes **Job**
+> - Set `absence` → Type becomes **Absence**
+> - Set neither → Type becomes **Resource** (general hours)
+
 ### What NOT to Do
 
 - ❌ Do NOT POST to `/employees({id})/timeRegistrationEntries` — always POST to the **top-level** `/timeRegistrationEntries`
@@ -356,3 +377,5 @@ $select=employeeNumber,jobNumber,jobTaskNumber,date,quantity,status
 - The `employee` sub-resource endpoint is useful when building per-employee time views
 - `lastModfiedDateTime` has a typo (missing 'i') — this is Microsoft's actual field name, use it as-is
 - The `employeeNumber` field corresponds to the **Resource No.** column shown on the Time Sheet page in BC
+- **Fields NOT available in the API:** Description, Chargeable, and Work Code are visible on the BC Time Sheet page but are NOT exposed in the `timeRegistrationEntries` API. You cannot read or write these fields via the standard v2.0 API.
+- **The Type field is auto-determined:** You don't set it — BC infers it from `jobNumber` (→ Job type) or `absence` (→ Absence type) or neither (→ Resource type)

@@ -105,6 +105,8 @@ When creating time entries:
 - **ALWAYS** use `employeeNumber` (the short employee code like `"MH"` or `"R0010"`) in the request body
 - **NEVER** use `employeeId` (a GUID) in the request body — BC will error with: *"The Employee does not exist"*
 - The employee sub-resource endpoint is **GET-only** — use it only to read entries for a specific employee
+- **The Type field is auto-determined** — you don't set it. BC infers it: `jobNumber` → Job, `absence` → Absence, neither → Resource
+- **These Time Sheet fields are NOT in the API:** Description, Chargeable, and Work Code. Do not try to set them — they are not exposed in the standard v2.0 `timeRegistrationEntries` entity.
 
 ### Projects / Jobs — 404 Warning
 
