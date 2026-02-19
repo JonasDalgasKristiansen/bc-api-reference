@@ -116,11 +116,12 @@ When creating time entries:
 For a time registration app, implement these steps in order:
 1. `GET /employees?$select=id,number,displayName` → populate employee dropdown
 2. `GET /projects?$select=id,number,displayName` → populate project dropdown (use OData `/Jobs` fallback if 404)
-3. **Job Tasks via OData** (NOT standard API): `GET .../ODataV4/Company('{name}')/JobTasks?$filter=Job_No eq '{projectNo}' and Job_Task_Type eq 'Posting'` — **must include `Accept: application/json` header**. Map `Job_Task_No` → `jobTaskNumber`
-4. `GET /timeRegistrationEntries?$filter=employeeNumber eq '{no}' and date ge {weekStart} and date le {weekEnd}` → check existing entries
-5. `POST /timeRegistrationEntries` with `{ "employeeNumber", "date", "quantity", "jobNumber", "jobTaskNumber" }` → create entry
+3. `GET /timeRegistrationEntries?$filter=employeeNumber eq '{no}' and date ge {weekStart} and date le {weekEnd}` → check existing entries
+4. `POST /timeRegistrationEntries` with `{ "employeeNumber", "date", "quantity", "jobNumber" }` → create entry
 
-See `resources/time-tracking/time-registration-entries.md` for full details and `resources/projects/job-tasks.md` for Job Tasks setup.
+> **Do NOT include `jobTaskNumber`** unless the user specifically asks for task-level tracking. It's optional and requires extra OData setup. Just use `jobNumber` for projects.
+
+See `resources/time-tracking/time-registration-entries.md` for full details.
 
 ### Projects / Jobs — 404 Warning
 

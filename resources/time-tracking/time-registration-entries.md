@@ -67,7 +67,7 @@ The Time Sheet page in BC shows several columns. **Not all of them are available
 | **Status**                | `status`             | ❌ Read-only     | `Open`, `Submitted`, `Rejected`, `Approved` — can only read, not change via API |
 | **Description**           | —                    | ❌ Not in API    | The Time Sheet Line description is not exposed in the `timeRegistrationEntries` entity |
 | **Project No.**           | `jobNumber`          | ✅ Yes           | Sets the project/job. Also auto-sets Type to `Job` |
-| **Project Task No.**      | `jobTaskNumber`      | ✅ Yes           | Task within the project. Requires `jobNumber` to be set |
+| **Project Task No.**      | `jobTaskNumber`      | ✅ Yes (optional) | **OPTIONAL.** Task within the project. Only use if you specifically need task-level tracking. Most apps only need `jobNumber`. |
 | **Cause of Absence Code** | `absence`            | ✅ Yes           | Sets the absence reason. Also auto-sets Type to `Absence` |
 | **Chargeable**            | —                    | ❌ Not in API    | The chargeable flag is not exposed in the standard v2.0 API |
 | **Work Code**             | —                    | ❌ Not in API    | Work codes are not exposed in the standard v2.0 API |
@@ -82,7 +82,7 @@ You don't set `Type` directly. BC determines it based on what you include in the
 
 | What You Include | Type Becomes | Example |
 |------------------|-------------|---------|
-| `jobNumber` (with or without `jobTaskNumber`) | **Job** | `{ "employeeNumber": "R0010", "jobNumber": "J10000", "date": "2026-02-17", "quantity": 8 }` |
+| `jobNumber` (optionally with `jobTaskNumber`) | **Job** | `{ "employeeNumber": "R0010", "jobNumber": "J10000", "date": "2026-02-17", "quantity": 8 }` |
 | `absence` | **Absence** | `{ "employeeNumber": "R0010", "absence": "Vacation", "date": "2026-02-17", "quantity": 8 }` |
 | Neither `jobNumber` nor `absence` | **Resource** | `{ "employeeNumber": "R0010", "date": "2026-02-17", "quantity": 8 }` |
 
@@ -159,7 +159,7 @@ Accept: application/json
       "employeeNumber": "R0010",
       "jobId": "00000000-0000-0000-0000-000000000000",
       "jobNumber": "J10000",
-      "jobTaskNumber": "JT1000",
+      "jobTaskNumber": "",
       "absence": "",
       "lineNumber": 10000,
       "date": "2026-02-17",
@@ -237,7 +237,7 @@ Content-Type: application/json
 
 > This creates a **Resource** type line (no project, no absence).
 
-### 5. Create — Time Entry with Project & Task
+### 5. Create — Time Entry with Project
 
 ```http
 POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries
@@ -248,14 +248,13 @@ Content-Type: application/json
   "employeeNumber": "R0010",
   "date": "2026-02-17",
   "quantity": 8.0,
-  "jobNumber": "J10000",
-  "jobTaskNumber": "JT1000"
+  "jobNumber": "J10000"
 }
 ```
 
 **Response:** `201 Created` — the entry will have Type = **Job** in the Time Sheet.
 
-> **To find valid project and task numbers**, see `resources/projects/projects.md` for projects and `resources/projects/job-tasks.md` for job tasks.
+> **`jobTaskNumber` is OPTIONAL.** You only need `jobNumber` to log time against a project. Only add `jobTaskNumber` if the user specifically picks a task. See the [Advanced: Job Task Numbers](#advanced-job-task-numbers-optional) section below.
 
 ### 6. Create — Absence Entry
 
@@ -285,7 +284,7 @@ POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntri
 Authorization: Bearer {access_token}
 Content-Type: application/json
 
-{"employeeNumber": "R0010", "date": "2026-02-16", "quantity": 8.0, "jobNumber": "J10000", "jobTaskNumber": "JT1000"}
+{"employeeNumber": "R0010", "date": "2026-02-16", "quantity": 8.0, "jobNumber": "J10000"}
 ```
 
 ```http
@@ -293,7 +292,7 @@ POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntri
 Authorization: Bearer {access_token}
 Content-Type: application/json
 
-{"employeeNumber": "R0010", "date": "2026-02-17", "quantity": 8.0, "jobNumber": "J10000", "jobTaskNumber": "JT1000"}
+{"employeeNumber": "R0010", "date": "2026-02-17", "quantity": 8.0, "jobNumber": "J10000"}
 ```
 
 ```http
@@ -301,7 +300,7 @@ POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntri
 Authorization: Bearer {access_token}
 Content-Type: application/json
 
-{"employeeNumber": "R0010", "date": "2026-02-18", "quantity": 8.0, "jobNumber": "J10000", "jobTaskNumber": "JT1000"}
+{"employeeNumber": "R0010", "date": "2026-02-18", "quantity": 8.0, "jobNumber": "J10000"}
 ```
 
 ```http
@@ -309,7 +308,7 @@ POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntri
 Authorization: Bearer {access_token}
 Content-Type: application/json
 
-{"employeeNumber": "R0010", "date": "2026-02-19", "quantity": 8.0, "jobNumber": "J10000", "jobTaskNumber": "JT1000"}
+{"employeeNumber": "R0010", "date": "2026-02-19", "quantity": 8.0, "jobNumber": "J10000"}
 ```
 
 ```http
@@ -317,7 +316,7 @@ POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntri
 Authorization: Bearer {access_token}
 Content-Type: application/json
 
-{"employeeNumber": "R0010", "date": "2026-02-20", "quantity": 7.5, "jobNumber": "J10000", "jobTaskNumber": "JT1000"}
+{"employeeNumber": "R0010", "date": "2026-02-20", "quantity": 7.5, "jobNumber": "J10000"}
 ```
 
 > All 5 entries become lines inside the **same** Time Sheet (Week 8, 16/02/2026–22/02/2026, Resource R0010). You **must** send one POST per day — there is no batch/array endpoint.
@@ -340,17 +339,13 @@ GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/projects?$select=id,nu
 
 > If this returns 404, use the OData fallback — see `resources/projects/projects.md`.
 
-**Step 3 — Get job tasks for the selected project (for a "Choose Task" dropdown):**
-
-> Job tasks are NOT in the standard API. Use OData — see `resources/projects/job-tasks.md`.
-
-**Step 4 — Check existing entries for the selected employee & week (to avoid duplicates):**
+**Step 3 — Check existing entries for the selected employee & week (to avoid duplicates):**
 
 ```http
-GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries?$filter=employeeNumber eq 'R0010' and date ge 2026-02-16 and date le 2026-02-22&$select=id,employeeNumber,jobNumber,jobTaskNumber,date,quantity,status
+GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries?$filter=employeeNumber eq 'R0010' and date ge 2026-02-16 and date le 2026-02-22&$select=id,employeeNumber,jobNumber,date,quantity,status
 ```
 
-**Step 5 — Create the time entry:**
+**Step 4 — Create the time entry:**
 
 ```http
 POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries
@@ -361,9 +356,11 @@ Content-Type: application/json
   "employeeNumber": "R0010",
   "date": "2026-02-17",
   "quantity": 8.0,
-  "jobNumber": "J10000",
-  "jobTaskNumber": "JT1000"
+  "jobNumber": "J10000"
 }
+```
+
+> **Note:** `jobTaskNumber` is intentionally omitted — it's optional. Only add it if the user specifically needs task-level tracking. See [Advanced: Job Task Numbers](#advanced-job-task-numbers-optional).
 ```
 
 ### 9. Update a Time Registration Entry
@@ -425,7 +422,7 @@ If this returns results, a Time Sheet exists for that employee's resource and we
 | `employeeNumber`       | string   | **Yes** ✅ | `"R0010"` | **USE THIS** — Employee number/code. Always use this when creating entries. |
 | `jobId`                | GUID     | No       | `"e4f5a6b7-c8d9-..."` | Project/job GUID (read-only, auto-set via `jobNumber`) |
 | `jobNumber`            | string   | **Yes** ✅ | `"J10000"` | Project/job number — sets Type to **Job** |
-| `jobTaskNumber`        | string   | **Yes** ✅ | `"JT1000"` | Job task number within the project |
+| `jobTaskNumber`        | string   | **Yes** ✅ | `"JT1000"` | **OPTIONAL.** Job task number within the project. Only needed for task-level tracking. Most apps should omit this. |
 | `absence`              | string   | **Yes** ✅ | `"Vacation"` | Absence code — sets Type to **Absence** |
 | `lineNumber`           | integer  | No       | `10000` | Auto-assigned line number in the Time Sheet |
 | `date`                 | date     | **Yes** ✅ | `"2026-02-17"` | Date the time was worked (YYYY-MM-DD) |
@@ -493,7 +490,7 @@ $filter=employeeNumber eq 'R0010' and date ge 2026-02-16 and date le 2026-02-22 
 ### Select specific fields (for performance)
 
 ```
-$select=id,employeeNumber,jobNumber,jobTaskNumber,date,quantity,status
+$select=id,employeeNumber,jobNumber,date,quantity,status
 ```
 
 ---
@@ -518,7 +515,8 @@ $select=id,employeeNumber,jobNumber,jobTaskNumber,date,quantity,status
 - **Time Sheets are NOT created via the API** — they are pre-created in BC via the "Create Time Sheets" batch job. The `timeRegistrationEntries` endpoint only adds LINES to existing Time Sheets.
 - **One entry = one line in an existing Time Sheet.** POST one entry per date. All entries for dates within the same week go into the same Time Sheet automatically.
 - **Never create multiple entries for the same employee + same date + same job** — update the existing entry's `quantity` instead with PATCH.
-- Use `jobNumber` and `jobTaskNumber` (NOT `jobNo` or `jobTaskNo`) — these are the correct API field names.
+- Use `jobNumber` (NOT `jobNo`) — this is the correct API field name. `jobTaskNumber` is optional.
+- **`jobTaskNumber` is OPTIONAL** — you can log time against a project with just `jobNumber`. Do NOT include `jobTaskNumber` unless the user specifically needs task-level tracking.
 - Entries with `status` other than `Open` cannot be edited or deleted.
 - Status transitions (Submit, Approve, Reject) happen in BC's Time Sheet page — NOT via the API.
 - If both `jobNumber` and `absence` are empty, the entry is a general **Resource** type entry.
@@ -526,4 +524,37 @@ $select=id,employeeNumber,jobNumber,jobTaskNumber,date,quantity,status
 - The `employeeNumber` field corresponds to the **Resource No.** column shown on the Time Sheet page in BC.
 - **Fields NOT available in the API:** Description, Chargeable, and Work Code are visible on the BC Time Sheet page but are NOT exposed in the `timeRegistrationEntries` API. You cannot read or write these fields via the standard v2.0 API.
 - **The Type field is auto-determined:** You don't set it — BC infers it from `jobNumber` (→ Job type) or `absence` (→ Absence type) or neither (→ Resource type).
-- For **Job Tasks**, see `resources/projects/job-tasks.md` — these require OData web services (not in the standard v2.0 API).
+- **`jobTaskNumber` is ADVANCED/OPTIONAL** — it requires OData web service setup in BC. See `resources/projects/job-tasks.md`. Most apps should NOT use it.
+
+---
+
+## Advanced: Job Task Numbers (Optional)
+
+> **Skip this section unless the user specifically asks for task-level tracking.** Most time registration apps only need `employeeNumber`, `date`, `quantity`, and `jobNumber`.
+
+`jobTaskNumber` lets you assign a time entry to a specific task within a project. However:
+
+1. **Job Tasks are NOT in the standard v2.0 API** — you must query them via OData web services
+2. **Requires BC setup** — an admin must publish Page 1004 as web service `JobTasks` in BC
+3. **OData returns different field names** — `Job_Task_No` (not `jobTaskNumber`)
+4. **Only `Posting` type tasks accept time entries**
+
+If you need it, see `resources/projects/job-tasks.md` for full setup and usage.
+
+### Example with job task number
+
+```http
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries
+Authorization: Bearer {access_token}
+Content-Type: application/json
+
+{
+  "employeeNumber": "R0010",
+  "date": "2026-02-17",
+  "quantity": 8.0,
+  "jobNumber": "J10000",
+  "jobTaskNumber": "JT1000"
+}
+```
+
+> Only add `jobTaskNumber` if you have a valid task number from the OData `JobTasks` endpoint.
