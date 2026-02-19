@@ -6,6 +6,19 @@ Connect this repo to your AI tool, add your credentials, and it can build fully 
 
 ---
 
+## Table of Contents
+
+| # | Section | What It Covers |
+|---|---------|---------------|
+| 1 | [What Is This?](#what-is-this) | What this repo does and who it's for |
+| 2 | [Setup Guide](#setup-guide-one-time) | One-time Azure + BC setup (~10 min) — app registration, secrets, permissions |
+| 3 | [Add Credentials](#add-your-credentials-to-lovable--bolt) | Where to paste your 5 secrets in Lovable or Bolt |
+| 4 | [How to Prompt the AI](#how-to-prompt-the-ai) | Prompt structure + 3 ready-to-use examples (time tracking, customers, sales) |
+| 5 | [Troubleshooting](#troubleshooting) | Common errors and how to fix them |
+| 6 | [What's in This Repo](#whats-in-this-repo) | Overview of all files and who they're for |
+
+---
+
 ## What Is This?
 
 This repository contains detailed documentation for every Business Central API endpoint — customers, invoices, items, time tracking, and more. It's structured so AI tools can read it and generate correct, working code.
