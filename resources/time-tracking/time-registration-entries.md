@@ -65,16 +65,16 @@ The Time Sheet page in BC shows several columns. **Not all of them are available
 |---------------------------|----------------------|-----------------|-------|
 | **Type**                  | *(auto-determined)*  | ❌ Not settable  | BC sets this automatically based on what fields you include (see below) |
 | **Status**                | `status`             | ❌ Read-only     | `Open`, `Submitted`, `Rejected`, `Approved` — can only read, not change via API |
-| **Description**           | —                    | ❌ Not in API    | The Time Sheet Line description is not exposed in the `timeRegistrationEntries` entity |
+| **Description**           | `Description` *(OData)* | ✅ Via OData     | Free text. Not in standard API — use OData `TimeSheetLines` PATCH. See [OData Hybrid section](#setting-description-chargeable-and-work-type-code-odata-hybrid-approach) below. |
 | **Project No.**           | `jobNumber`          | ✅ Yes           | Sets the project/job. Also auto-sets Type to `Job` |
 | **Project Task No.**      | `jobTaskNumber`      | ✅ Yes (optional) | **OPTIONAL.** Task within the project. Only use if you specifically need task-level tracking. Most apps only need `jobNumber`. |
 | **Cause of Absence Code** | `absence`            | ✅ Yes           | Sets the absence reason. Also auto-sets Type to `Absence` |
-| **Chargeable**            | —                    | ❌ Not in API    | The chargeable flag is not exposed in the standard v2.0 API |
-| **Work Code**             | —                    | ❌ Not in API    | Work codes are not exposed in the standard v2.0 API |
+| **Chargeable**            | `Chargeable` *(OData)* | ✅ Via OData     | Boolean. Not in standard API — use OData `TimeSheetLines` PATCH. See [OData Hybrid section](#setting-description-chargeable-and-work-type-code-odata-hybrid-approach) below. |
+| **Work Type Code**        | `Work_Type_Code` *(OData)* | ✅ Via OData  | String. Not in standard API — use OData `TimeSheetLines` PATCH. See [OData Hybrid section](#setting-description-chargeable-and-work-type-code-odata-hybrid-approach) below. |
 | **Mon–Sun hours**         | `date` + `quantity`  | ✅ Yes           | Each day is a separate POST with a `date` and `quantity` (hours) |
 | **Total**                 | *(calculated)*       | ❌ Read-only     | Sum of all entries for the week — calculated by BC |
 
-> **Why AI tools can't fill in Description, Chargeable, or Work Code:** These fields exist in BC's Time Sheet Line table but Microsoft's standard `timeRegistrationEntries` API entity simply does not include them. Only the fields listed in the [Field Definitions](#field-definitions) section below are available.
+> **Description, Chargeable, and Work Type Code** are not in the standard `timeRegistrationEntries` API, but **CAN be set** via a hybrid approach using an OData web service. See the [OData Hybrid section](#setting-description-chargeable-and-work-type-code-odata-hybrid-approach) below for full setup and code examples. A BC administrator must publish the web service first (one-time, ~30 seconds).
 
 ### How the Type Column Works
 
@@ -558,3 +558,225 @@ Content-Type: application/json
 ```
 
 > Only add `jobTaskNumber` if you have a valid task number from the OData `JobTasks` endpoint.
+
+---
+
+## Setting Description, Chargeable, and Work Type Code (OData Hybrid Approach)
+
+> **The standard `timeRegistrationEntries` API does not expose `Description`, `Chargeable`, or `Work Type Code`.** To set these fields — especially Description — you must use an OData web service for Time Sheet Lines as a secondary step after creating the entry via the standard API.
+
+This is the same pattern used for Job Tasks (see `resources/projects/job-tasks.md`).
+
+### Why This Matters
+
+- **Description** is the most important missing field — it lets employees describe what they worked on (e.g., `"Sprint planning meeting"`, `"Bug fix for login page"`)
+- **Chargeable** (boolean) indicates whether the time is billable
+- **Work Type Code** classifies the type of work (e.g., `"DEV"`, `"MEETING"`, `"TRAVEL"`)
+
+Without the OData step, these fields remain blank in BC's Time Sheet.
+
+### BC Admin Setup (One-Time)
+
+A BC administrator must publish Page 951 as an OData web service. This takes ~30 seconds:
+
+1. Open **Business Central**
+2. Search for **Web Services** and open it
+3. Click **+ New**
+4. Fill in:
+   - **Object Type:** `Page`
+   - **Object ID:** `951`
+   - **Service Name:** `TimeSheetLines`
+   - **Published:** ✅ (checked)
+5. Close the page
+
+> **Without this step, the OData endpoint will return 404.** If you get a 404 on the OData URL below, the web service has not been published yet.
+
+### OData Endpoint
+
+```
+https://api.businesscentral.dynamics.com/v2.0/{BC_TENANT_ID}/{BC_ENVIRONMENT}/ODataV4/Company('{BC_COMPANY_NAME}')/TimeSheetLines
+```
+
+Uses the same OAuth2 Bearer token as the standard API. **You MUST include `Accept: application/json`** — without it, BC returns HTML instead of JSON.
+
+### Hybrid Flow (Recommended)
+
+Use the standard API to create entries (simple employee handling), then enrich them via OData:
+
+```
+Step 1: POST /timeRegistrationEntries          → Create entry (employeeNumber, date, quantity, jobNumber)
+Step 2: Read back the created entry             → Get the id and lineNumber from the response
+Step 3: GET OData TimeSheetLines                → Find the matching line using employeeNumber + date + lineNumber
+Step 4: PATCH OData TimeSheetLine               → Set Description, Chargeable, Work_Type_Code
+```
+
+### Step-by-Step with HTTP Examples
+
+**Step 1 — Create the time entry via standard API:**
+
+```http
+POST {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/timeRegistrationEntries
+Authorization: Bearer {access_token}
+Content-Type: application/json
+
+{
+  "employeeNumber": "R0010",
+  "date": "2026-02-17",
+  "quantity": 8.0,
+  "jobNumber": "J10000"
+}
+```
+
+Response includes `lineNumber` (e.g., `10000`) — save this value.
+
+**Step 2 — Find the matching OData Time Sheet Line:**
+
+```http
+GET https://api.businesscentral.dynamics.com/v2.0/{BC_TENANT_ID}/{BC_ENVIRONMENT}/ODataV4/Company('{BC_COMPANY_NAME}')/TimeSheetLines?$filter=Line_No eq 10000 and Job_No eq 'J10000'&$select=Time_Sheet_No,Line_No,Description,Chargeable,Work_Type_Code,Job_No,Job_Task_No,Type,Status
+Authorization: Bearer {access_token}
+Accept: application/json
+```
+
+> **Correlation tip:** Filter by `Line_No` (from step 1's `lineNumber`) and `Job_No` (from `jobNumber`). For more precision, also filter by date if available in the OData fields, or query the employee's Time Sheet for that week.
+
+**Step 3 — PATCH the missing fields:**
+
+```http
+PATCH https://api.businesscentral.dynamics.com/v2.0/{BC_TENANT_ID}/{BC_ENVIRONMENT}/ODataV4/Company('{BC_COMPANY_NAME}')/TimeSheetLines(Time_Sheet_No='TS00042',Line_No=10000)
+Authorization: Bearer {access_token}
+Content-Type: application/json
+If-Match: {etag}
+
+{
+  "Description": "Sprint planning meeting",
+  "Chargeable": true,
+  "Work_Type_Code": "DEV"
+}
+```
+
+> You only need to include the fields you want to update. `Description` alone is the most common case.
+
+### Complete Code Example (TypeScript)
+
+```typescript
+/**
+ * Create a time entry with Description via the hybrid approach.
+ * Step 1: POST via standard API (handles employee→resource mapping)
+ * Step 2: PATCH via OData (sets Description, Chargeable, Work_Type_Code)
+ */
+async function createTimeEntryWithDescription(
+  employeeNumber: string,
+  date: string,
+  quantity: number,
+  jobNumber: string,
+  description: string,
+  chargeable?: boolean,
+  workTypeCode?: string
+) {
+  const token = await getToken();
+
+  // Step 1: Create entry via standard API
+  const createResp = await fetch(
+    `${BC_BASE_URL}/companies(name='${BC_COMPANY_NAME}')/timeRegistrationEntries`,
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ employeeNumber, date, quantity, jobNumber }),
+    }
+  );
+  if (!createResp.ok) throw new Error(`Create failed: ${createResp.status}`);
+  const entry = await createResp.json();
+  const lineNumber = entry.lineNumber; // e.g., 10000
+
+  // Step 2: Find the matching OData Time Sheet Line
+  const odataBase = `https://api.businesscentral.dynamics.com/v2.0/${BC_TENANT_ID}/${BC_ENVIRONMENT}/ODataV4/Company('${BC_COMPANY_NAME}')`;
+  const filter = `$filter=Line_No eq ${lineNumber} and Job_No eq '${jobNumber}'`;
+  const select = `$select=Time_Sheet_No,Line_No,Description,Chargeable,Work_Type_Code`;
+
+  const findResp = await fetch(
+    `${odataBase}/TimeSheetLines?${filter}&${select}`,
+    {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json',
+      },
+    }
+  );
+  if (!findResp.ok) throw new Error(`OData GET failed: ${findResp.status}`);
+  const findData = await findResp.json();
+  const line = findData.value[0];
+  if (!line) throw new Error('Could not find matching Time Sheet Line via OData');
+
+  // Step 3: PATCH the missing fields
+  const patchBody: Record<string, any> = { Description: description };
+  if (chargeable !== undefined) patchBody.Chargeable = chargeable;
+  if (workTypeCode) patchBody.Work_Type_Code = workTypeCode;
+
+  const patchResp = await fetch(
+    `${odataBase}/TimeSheetLines(Time_Sheet_No='${line.Time_Sheet_No}',Line_No=${line.Line_No})`,
+    {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'If-Match': findData.value[0]['@odata.etag'],
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(patchBody),
+    }
+  );
+  if (!patchResp.ok) throw new Error(`OData PATCH failed: ${patchResp.status}`);
+
+  return { ...entry, description, chargeable, workTypeCode };
+}
+
+// Usage:
+await createTimeEntryWithDescription(
+  "R0010",           // employeeNumber
+  "2026-02-17",      // date
+  8.0,               // quantity (hours)
+  "J10000",          // jobNumber
+  "Sprint planning", // description ← the key field
+  true,              // chargeable (optional)
+  "DEV"              // workTypeCode (optional)
+);
+```
+
+### OData Field Names
+
+OData uses underscores, not camelCase. Here is the mapping:
+
+| BC Time Sheet Column | OData Field Name | Type | Editable | Notes |
+|---|---|---|---|---|
+| Time Sheet No. | `Time_Sheet_No` | string | No | Key — identifies the weekly Time Sheet |
+| Line No. | `Line_No` | integer | No | Key — matches `lineNumber` from standard API |
+| Type | `Type` | string | No | `Resource`, `Job`, `Absence` — auto-set by BC |
+| Description | `Description` | string | **Yes** ✅ | Free text — **most important missing field** |
+| Job No. | `Job_No` | string | Yes | Same as `jobNumber` in standard API |
+| Job Task No. | `Job_Task_No` | string | Yes | Same as `jobTaskNumber` in standard API |
+| Cause of Absence Code | `Cause_of_Absence_Code` | string | Yes | Same as `absence` in standard API |
+| Chargeable | `Chargeable` | boolean | **Yes** ✅ | Whether the time is billable |
+| Work Type Code | `Work_Type_Code` | string | **Yes** ✅ | Work classification code |
+| Status | `Status` | string | No | Open, Submitted, Rejected, Approved |
+
+### Troubleshooting — OData
+
+| Problem | Cause | Fix |
+|---|---|---|
+| 404 on OData URL | Web service not published | BC admin must publish Page 951 as `TimeSheetLines` (see setup above) |
+| HTML returned instead of JSON | Missing `Accept: application/json` header | Add `Accept: application/json` to every OData request |
+| Can't PATCH Description | Time Sheet Line status is not Open | Only `Open` lines can be edited — same restriction as standard API |
+| Empty result on GET | Wrong filter values | Verify `Time_Sheet_No` and `Line_No` match — use the `lineNumber` from the standard API response |
+| `Work_Type_Code` rejected | Invalid code | Check valid Work Type Codes in BC: search for **Work Types** page |
+
+### Important Notes — OData Hybrid
+
+- **Always create entries via the standard `timeRegistrationEntries` API first**, then enrich via OData. The standard API handles employee→resource mapping automatically. Do NOT try to POST directly to the OData endpoint — it requires `Time_Sheet_No` and `Resource_No` which are harder to work with.
+- **Description is the highest-value field** — it's what employees actually type to describe their work. If you only PATCH one field, make it Description.
+- **The OData PATCH only works on Open entries** — once a Time Sheet is Submitted or Approved, the lines are read-only.
+- **OData field names use underscores** (`Work_Type_Code`), not camelCase (`workTypeCode`). Do NOT mix these up.
+- **Valid Work Type Codes** depend on BC setup — query the Work Types page in BC or ask the user to provide the available codes.
+- **Valid Cause of Absence Codes** also depend on BC setup — query the Causes of Absence page in BC.

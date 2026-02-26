@@ -106,7 +106,7 @@ When creating time entries:
 - **NEVER** use `employeeId` (a GUID) in the request body — BC will error with: *"The Employee does not exist"*
 - The employee sub-resource endpoint is **GET-only** — use it only to read entries for a specific employee
 - **The Type field is auto-determined** — you don't set it. BC infers it: `jobNumber` → Job, `absence` → Absence, neither → Resource
-- **These Time Sheet fields are NOT in the API:** Description, Chargeable, and Work Code. Do not try to set them — they are not exposed in the standard v2.0 `timeRegistrationEntries` entity.
+- **Description, Chargeable, and Work Type Code** are NOT in the standard `timeRegistrationEntries` API, but **CAN be set** via the **OData hybrid approach**: create the entry via the standard API, then PATCH `Description`, `Chargeable`, `Work_Type_Code` via an OData web service (`TimeSheetLines`, Page 951). See `resources/time-tracking/time-registration-entries.md` → "Setting Description, Chargeable, and Work Type Code" section for the full flow. **Always ask the user if they need Description on time entries** — if yes, use the hybrid approach.
 - **Status is read-only** — you cannot submit, approve, or reject entries via the API. This is done in BC's Time Sheet UI.
 - **One entry per date** — do not create one entry per hour. Create one entry per date with total hours in `quantity`.
 - **Employee = Resource** — `employeeNumber` in the API corresponds to the Resource No. shown in BC Time Sheets. The employee must be linked to a resource in BC.
