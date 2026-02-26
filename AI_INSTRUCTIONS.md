@@ -118,8 +118,11 @@ For a time registration app, implement these steps in order:
 2. `GET /projects?$select=id,number,displayName` → populate project dropdown (use OData `/Jobs` fallback if 404)
 3. `GET /timeRegistrationEntries?$filter=employeeNumber eq '{no}' and date ge {weekStart} and date le {weekEnd}` → check existing entries
 4. `POST /timeRegistrationEntries` with `{ "employeeNumber", "date", "quantity", "jobNumber" }` → create entry
+5. *(If Description is needed)* `GET` + `PATCH` on OData `TimeSheetLines` → set `Description`, `Chargeable`, `Work_Type_Code` on the created line. See `resources/time-tracking/time-registration-entries.md` → "Setting Description, Chargeable, and Work Type Code" section for the full hybrid flow and code example. **This requires BC admin to publish Page 951 as web service `TimeSheetLines` first.**
 
 > **Do NOT include `jobTaskNumber`** unless the user specifically asks for task-level tracking. It's optional and requires extra OData setup. Just use `jobNumber` for projects.
+
+> **Always ask the user if they need Description on time entries.** If yes, implement Step 5 using the OData hybrid approach. If no, Steps 1–4 are sufficient.
 
 See `resources/time-tracking/time-registration-entries.md` for full details.
 

@@ -112,7 +112,7 @@ You don't set `Type` directly. BC determines it based on what you include in the
 - ❌ Do NOT create one entry per hour — create one entry per date with total `quantity` (hours) for that day
 - ❌ Do NOT assign entries to a Resource number directly — use `employeeNumber` which corresponds to the Resource's linked employee
 - ❌ Do NOT set both `jobNumber` and `absence` on the same entry
-- ❌ Do NOT try to set `description`, `chargeable`, or `workCode` — these fields are not in the API
+- ❌ Do NOT try to set `description`, `chargeable`, or `workTypeCode` via the standard API — use the [OData hybrid approach](#setting-description-chargeable-and-work-type-code-odata-hybrid-approach) described below
 - ❌ Do NOT try to change `status` via PATCH — status transitions are done in BC's Time Sheet UI
 
 ---
@@ -361,7 +361,6 @@ Content-Type: application/json
 ```
 
 > **Note:** `jobTaskNumber` is intentionally omitted — it's optional. Only add it if the user specifically needs task-level tracking. See [Advanced: Job Task Numbers](#advanced-job-task-numbers-optional).
-```
 
 ### 9. Update a Time Registration Entry
 
@@ -522,7 +521,7 @@ $select=id,employeeNumber,jobNumber,date,quantity,status
 - If both `jobNumber` and `absence` are empty, the entry is a general **Resource** type entry.
 - `lastModfiedDateTime` has a typo (missing 'i') — this is Microsoft's actual field name, use it as-is.
 - The `employeeNumber` field corresponds to the **Resource No.** column shown on the Time Sheet page in BC.
-- **Fields NOT available in the API:** Description, Chargeable, and Work Code are visible on the BC Time Sheet page but are NOT exposed in the `timeRegistrationEntries` API. You cannot read or write these fields via the standard v2.0 API.
+- **Description, Chargeable, and Work Type Code** are not in the standard `timeRegistrationEntries` API but **CAN be set** via the [OData hybrid approach](#setting-description-chargeable-and-work-type-code-odata-hybrid-approach) — see the section below.
 - **The Type field is auto-determined:** You don't set it — BC infers it from `jobNumber` (→ Job type) or `absence` (→ Absence type) or neither (→ Resource type).
 - **`jobTaskNumber` is ADVANCED/OPTIONAL** — it requires OData web service setup in BC. See `resources/projects/job-tasks.md`. Most apps should NOT use it.
 
@@ -638,6 +637,8 @@ Accept: application/json
 ```
 
 > **Correlation tip:** Filter by `Line_No` (from step 1's `lineNumber`) and `Job_No` (from `jobNumber`). For more precision, also filter by date if available in the OData fields, or query the employee's Time Sheet for that week.
+>
+> **⚠️ Production warning:** The filter `Line_No eq X and Job_No eq 'Y'` alone could match lines from **other employees' Time Sheets** (line numbers are not globally unique). In production, you should also resolve the employee's `Time_Sheet_No` first (e.g., by filtering `TimeSheetLines` on the employee's Resource No. and the week's starting date) and include `Time_Sheet_No eq 'TSxxxxx'` in the filter to avoid cross-employee matches.
 
 **Step 3 — PATCH the missing fields:**
 
