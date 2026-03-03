@@ -96,6 +96,7 @@ Common mistakes to avoid:
 - ❌ `/jobs` → ✅ `/projects` (v22.0+) or OData `/Jobs` web service (all versions)
 - ❌ POST to `/employees({id})/timeRegistrationEntries` → ✅ POST to `/timeRegistrationEntries` (top-level)
 - ❌ `employeeId` in POST body → ✅ `employeeNumber` in POST body (short code like `"MH"`, not a GUID)
+- ❌ `jobId` in POST body → ✅ `jobNumber` in POST body. `jobId` is read-only (auto-set by BC from `jobNumber`). Sending a non-GUID `jobId` causes BC to silently ignore the project assignment. Only use `jobNumber`.
 
 ### Time Registration Entries — CRITICAL
 
@@ -106,7 +107,7 @@ When creating time entries:
 - **NEVER** use `employeeId` (a GUID) in the request body — BC will error with: *"The Employee does not exist"*
 - The employee sub-resource endpoint is **GET-only** — use it only to read entries for a specific employee
 - **The Type field is auto-determined** — you don't set it. BC infers it: `jobNumber` → Job, `absence` → Absence, neither → Resource
-- **Description, Chargeable, and Work Type Code** are NOT in the standard `timeRegistrationEntries` API, but **CAN be set** via the **OData hybrid approach**: create the entry via the standard API, then PATCH `Description`, `Chargeable`, `Work_Type_Code` via an OData web service (`TimeSheetLines`, Page 951). See `resources/time-tracking/time-registration-entries.md` → "Setting Description, Chargeable, and Work Type Code" section for the full flow. **Always ask the user if they need Description on time entries** — if yes, use the hybrid approach.
+- **Description, Chargeable, and Work Type Code** are NOT in the standard `timeRegistrationEntries` API, but **CAN be set** via the **OData hybrid approach**: create the entry via the standard API, wait ~1.5s for propagation, then find and PATCH `Description`, `Chargeable`, `Work_Type_Code` via an OData web service. Publish **Page 951** as **`TimeSheet`** (NOT `TimeSheetLines`) in BC → Web Services, then navigate from the header to its lines via the `TimeSheetLines` navigation property. See `resources/time-tracking/time-registration-entries.md` → "Setting Description, Chargeable, and Work Type Code" section for the full flow and code example. **Always ask the user if they need Description on time entries** — if yes, use the hybrid approach.
 - **Status is read-only** — you cannot submit, approve, or reject entries via the API. This is done in BC's Time Sheet UI.
 - **One entry per date** — do not create one entry per hour. Create one entry per date with total hours in `quantity`.
 - **Employee = Resource** — `employeeNumber` in the API corresponds to the Resource No. shown in BC Time Sheets. The employee must be linked to a resource in BC.
@@ -118,7 +119,7 @@ For a time registration app, implement these steps in order:
 2. `GET /projects?$select=id,number,displayName` → populate project dropdown (use OData `/Jobs` fallback if 404)
 3. `GET /timeRegistrationEntries?$filter=employeeNumber eq '{no}' and date ge {weekStart} and date le {weekEnd}` → check existing entries
 4. `POST /timeRegistrationEntries` with `{ "employeeNumber", "date", "quantity", "jobNumber" }` → create entry
-5. *(If Description is needed)* `GET` + `PATCH` on OData `TimeSheetLines` → set `Description`, `Chargeable`, `Work_Type_Code` on the created line. See `resources/time-tracking/time-registration-entries.md` → "Setting Description, Chargeable, and Work Type Code" section for the full hybrid flow and code example. **This requires BC admin to publish Page 951 as web service `TimeSheetLines` first.**
+5. *(If Description is needed)* Wait ~1.5s for propagation, then navigate through OData `TimeSheet` headers → `TimeSheetLines` navigation property to find and PATCH `Description`, `Chargeable`, `Work_Type_Code` on the created line. **Retry 2–3 times with delays if the line isn't found immediately.** See `resources/time-tracking/time-registration-entries.md` → "Setting Description, Chargeable, and Work Type Code" section for the full hybrid flow and code example. **This requires BC admin to publish Page 951 as web service `TimeSheet` first (NOT `TimeSheetLines`).**
 
 > **Do NOT include `jobTaskNumber`** unless the user specifically asks for task-level tracking. It's optional and requires extra OData setup. Just use `jobNumber` for projects.
 
@@ -249,6 +250,70 @@ async function bcPatch(path: string, etag: string, body: object): Promise<any> {
 
 ---
 
+---
+
+## RULE 8: EXPORTING LOCAL DATA TO BC — ALWAYS RESOLVE BC IDs FIRST
+
+When exporting local POS sales (or any locally-stored records) back to Business Central as Sales Orders, **never send local database primary keys to BC**. Your local DB may use the same GUIDs as BC for some tables (e.g. `items.id` = BC GUID), but always resolve BC identifiers explicitly from the local mirror before posting.
+
+### ❌ Two bugs that commonly break exports
+
+#### Bug 1 — Wrong customer identifier on Sales Order header
+
+When creating a Sales Order in BC, the `customerNumber` field must be the BC customer number (e.g. `"10000"`), not a GUID and not whatever was cached at checkout.
+
+**❌ Wrong:**
+```js
+customerNumber: sale.customer_id        // GUID — BC rejects or mismatches
+customerNumber: sale.customer_number    // May have been stored incorrectly at checkout time
+```
+
+**✅ Correct — look it up from the local customers table:**
+```js
+// Always resolve via the customers mirror table before exporting
+let bcCustomerNumber = '10000'; // fallback: BC default walk-in customer
+if (sale.customer_id) {
+  const customer = await db.queryOne('SELECT number FROM customers WHERE id = ?', [sale.customer_id]);
+  if (customer?.number) bcCustomerNumber = customer.number;
+}
+await bcPost('/salesOrders', { customerNumber: bcCustomerNumber, ... });
+```
+
+#### Bug 2 — Wrong item identifier on Sales Order Lines
+
+When creating order lines, use `itemId` (the BC item GUID) — **not** a local database UUID, and not `lineObjectNumber` with a value you haven't verified. BC uses the GUID to look up the item and auto-fills the item number and description. Sending an unrecognised ID results in a line with no item.
+
+In this repo's POS schema, `items.id` stores the BC GUID directly. `sale_lines.item_id` should mirror this value when the sale was created from an imported item.
+
+**❌ Wrong:**
+```js
+itemId: localProductUUID          // Local UUID — BC doesn't recognise it, line is empty
+lineObjectNumber: line.item_number // Item number may be stale or not stored correctly
+```
+
+**✅ Correct — use the BC GUID, with a number-based fallback:**
+```js
+let bcItemId = line.item_id; // items.id = BC GUID
+if (!bcItemId && line.item_number) {
+  const item = await db.queryOne('SELECT id FROM items WHERE number = ?', [line.item_number]);
+  if (item) bcItemId = item.id;
+}
+await bcPost(`/salesOrders(${orderId})/salesOrderLines`, {
+  lineType: 'Item',
+  itemId: bcItemId,   // BC GUID — BC resolves item number & description automatically
+  quantity: line.quantity,
+  unitPrice: line.unit_price,
+});
+```
+
+### General rule
+
+> **Before exporting any record to BC, always resolve BC identifiers (GUIDs and human-readable numbers like `"10000"`) by querying your local mirror table. Never trust IDs that were stored at transaction time without re-validating them.**
+
+This pattern applies to customers, items, payment methods, tax groups, and any other BC-mirrored entity.
+
+---
+
 ## SUMMARY
 
 1. **Ask for credentials first** — never build without them
@@ -258,3 +323,4 @@ async function bcPatch(path: string, etag: string, body: object): Promise<any> {
 5. **Use company name** in URLs, not GUIDs: `companies(name='{BC_COMPANY_NAME}')`
 6. **Cache tokens** and refresh before expiry
 7. **Read the specific resource file** for the endpoint you're working with — it has all the fields, examples, and gotchas
+8. **Resolve BC IDs before exporting** — never send local DB primary keys to BC (see Rule 8)

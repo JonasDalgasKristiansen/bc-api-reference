@@ -419,7 +419,7 @@ If this returns results, a Time Sheet exists for that employee's resource and we
 | `id`                   | GUID     | No       | `"a1b2c3d4-e5f6-..."` | Unique identifier |
 | `employeeId`           | GUID     | No       | `"d1e2f3a4-b5c6-..."` | Employee GUID (read-only — returned in response, do NOT send in POST body) |
 | `employeeNumber`       | string   | **Yes** ✅ | `"R0010"` | **USE THIS** — Employee number/code. Always use this when creating entries. |
-| `jobId`                | GUID     | No       | `"e4f5a6b7-c8d9-..."` | Project/job GUID (read-only, auto-set via `jobNumber`) |
+| `jobId`                | GUID     | No       | `"e4f5a6b7-c8d9-..."` | Project/job GUID (read-only, auto-set via `jobNumber`). **Do NOT send `jobId` in POST body** — use `jobNumber` instead. Sending a non-GUID value as `jobId` causes BC to silently ignore the project. |
 | `jobNumber`            | string   | **Yes** ✅ | `"J10000"` | Project/job number — sets Type to **Job** |
 | `jobTaskNumber`        | string   | **Yes** ✅ | `"JT1000"` | **OPTIONAL.** Job task number within the project. Only needed for task-level tracking. Most apps should omit this. |
 | `absence`              | string   | **Yes** ✅ | `"Vacation"` | Absence code — sets Type to **Absence** |
@@ -584,16 +584,28 @@ A BC administrator must publish Page 951 as an OData web service. This takes ~30
 4. Fill in:
    - **Object Type:** `Page`
    - **Object ID:** `951`
-   - **Service Name:** `TimeSheetLines`
+   - **Service Name:** `TimeSheet` *(important: use this exact name, NOT "TimeSheetLines")*
    - **Published:** ✅ (checked)
 5. Close the page
 
 > **Without this step, the OData endpoint will return 404.** If you get a 404 on the OData URL below, the web service has not been published yet.
+>
+> **⚠️ Service Name matters:** Page 951 is a **Card page** (Time Sheet header + lines subform). Publishing it as `TimeSheet` lets you navigate from the header to its lines via OData. Do NOT name it `TimeSheetLines` — that name implies a standalone lines list, but Page 951 is a Card page and will return 0 records when queried directly as a list. The lines are accessed via a navigation property on the header.
+>
+> **Alternative:** If you prefer a direct lines endpoint, publish **Page 952** (Time Sheet Lines Subform) as `TimeSheetLines` instead. Some BC versions may not support this — Page 951 as `TimeSheet` is the recommended approach.
 
 ### OData Endpoint
 
+Page 951 published as `TimeSheet` exposes the **header** at:
+
 ```
-https://api.businesscentral.dynamics.com/v2.0/{BC_TENANT_ID}/{BC_ENVIRONMENT}/ODataV4/Company('{BC_COMPANY_NAME}')/TimeSheetLines
+https://api.businesscentral.dynamics.com/v2.0/{BC_TENANT_ID}/{BC_ENVIRONMENT}/ODataV4/Company('{BC_COMPANY_NAME}')/TimeSheet
+```
+
+The lines are accessed via a **navigation property** on each header:
+
+```
+https://api.businesscentral.dynamics.com/v2.0/{BC_TENANT_ID}/{BC_ENVIRONMENT}/ODataV4/Company('{BC_COMPANY_NAME}')/TimeSheet(No='TS00042')/TimeSheetLines
 ```
 
 Uses the same OAuth2 Bearer token as the standard API. **You MUST include `Accept: application/json`** — without it, BC returns HTML instead of JSON.
@@ -605,9 +617,13 @@ Use the standard API to create entries (simple employee handling), then enrich t
 ```
 Step 1: POST /timeRegistrationEntries          → Create entry (employeeNumber, date, quantity, jobNumber)
 Step 2: Read back the created entry             → Get the id and lineNumber from the response
-Step 3: GET OData TimeSheetLines                → Find the matching line using employeeNumber + date + lineNumber
-Step 4: PATCH OData TimeSheetLine               → Set Description, Chargeable, Work_Type_Code
+Step 3: Wait ~1.5 seconds                      → Allow BC to propagate the new entry to OData
+Step 4: GET OData TimeSheet headers             → Find the Time Sheet covering the entry's week
+Step 5: GET OData TimeSheet → lines nav prop    → Navigate to the lines and find the matching lineNumber
+Step 6: PATCH OData TimeSheetLine               → Set Description, Chargeable, Work_Type_Code
 ```
+
+> **⚠️ Propagation delay:** After creating an entry via the standard API (Step 1), the new line may not immediately appear in the OData endpoint. **Always add a short delay (1–2 seconds)** before querying OData. If the line is not found on the first try, **retry 2–3 times with increasing delays** (e.g., 1.5s, 3s, 4.5s) before giving up.
 
 ### Step-by-Step with HTTP Examples
 
@@ -628,22 +644,42 @@ Content-Type: application/json
 
 Response includes `lineNumber` (e.g., `10000`) — save this value.
 
-**Step 2 — Find the matching OData Time Sheet Line:**
+**Step 2 — Wait for BC to propagate the new entry:**
+
+Wait **1.5–2 seconds** before querying OData. The new entry may not appear immediately.
+
+**Step 3 — Find the Time Sheet header covering this week:**
+
+Query the `TimeSheet` OData endpoint (Page 951 published as `TimeSheet`) to find recent time sheets. Then navigate to their lines via the navigation property:
 
 ```http
-GET https://api.businesscentral.dynamics.com/v2.0/{BC_TENANT_ID}/{BC_ENVIRONMENT}/ODataV4/Company('{BC_COMPANY_NAME}')/TimeSheetLines?$filter=Line_No eq 10000 and Job_No eq 'J10000'&$select=Time_Sheet_No,Line_No,Description,Chargeable,Work_Type_Code,Job_No,Job_Task_No,Type,Status
+GET https://api.businesscentral.dynamics.com/v2.0/{BC_TENANT_ID}/{BC_ENVIRONMENT}/ODataV4/TimeSheet?$select=No&$orderby=No desc&$top=20&company={BC_COMPANY_NAME}
 Authorization: Bearer {access_token}
 Accept: application/json
 ```
 
-> **Correlation tip:** Filter by `Line_No` (from step 1's `lineNumber`) and `Job_No` (from `jobNumber`). For more precision, also filter by date if available in the OData fields, or query the employee's Time Sheet for that week.
->
-> **⚠️ Production warning:** The filter `Line_No eq X and Job_No eq 'Y'` alone could match lines from **other employees' Time Sheets** (line numbers are not globally unique). In production, you should also resolve the employee's `Time_Sheet_No` first (e.g., by filtering `TimeSheetLines` on the employee's Resource No. and the week's starting date) and include `Time_Sheet_No eq 'TSxxxxx'` in the filter to avoid cross-employee matches.
+> **Note:** Use `company=` as a query parameter (not in the path) to avoid issues with special characters like `/` in company names such as `A/S`.
 
-**Step 3 — PATCH the missing fields:**
+**Step 4 — Navigate to the Time Sheet's lines and find the matching lineNumber:**
+
+For each time sheet header, navigate to its lines via the `TimeSheetLines` navigation property:
 
 ```http
-PATCH https://api.businesscentral.dynamics.com/v2.0/{BC_TENANT_ID}/{BC_ENVIRONMENT}/ODataV4/Company('{BC_COMPANY_NAME}')/TimeSheetLines(Time_Sheet_No='TS00042',Line_No=10000)
+GET https://api.businesscentral.dynamics.com/v2.0/{BC_TENANT_ID}/{BC_ENVIRONMENT}/ODataV4/TimeSheet(No='TS00042')/TimeSheetLines?$top=50&company={BC_COMPANY_NAME}
+Authorization: Bearer {access_token}
+Accept: application/json
+```
+
+Find the line where `Line_No` matches the `lineNumber` from Step 1.
+
+> **Navigation property names** may vary between BC versions. Try: `TimeSheetLines`, `Time_Sheet_Lines`, `Lines`. Sample one header first to discover the correct name.
+>
+> **Retry if not found:** If the line doesn't appear in any time sheet on the first try, wait 2–3 seconds and scan again. Newly created entries may take a moment to propagate to OData.
+
+**Step 5 — PATCH the missing fields:**
+
+```http
+PATCH https://api.businesscentral.dynamics.com/v2.0/{BC_TENANT_ID}/{BC_ENVIRONMENT}/ODataV4/TimeSheet(No='TS00042')/TimeSheetLines(Line_No=10000)?company={BC_COMPANY_NAME}
 Authorization: Bearer {access_token}
 Content-Type: application/json
 If-Match: {etag}
@@ -660,10 +696,16 @@ If-Match: {etag}
 ### Complete Code Example (TypeScript)
 
 ```typescript
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 /**
  * Create a time entry with Description via the hybrid approach.
  * Step 1: POST via standard API (handles employee→resource mapping)
- * Step 2: PATCH via OData (sets Description, Chargeable, Work_Type_Code)
+ * Step 2: Wait for BC to propagate the entry to OData
+ * Step 3: Find the line via OData TimeSheet header → lines navigation
+ * Step 4: PATCH via OData (sets Description, Chargeable, Work_Type_Code)
+ *
+ * PREREQUISITE: Page 951 must be published as "TimeSheet" in BC → Web Services
  */
 async function createTimeEntryWithDescription(
   employeeNumber: string,
@@ -678,7 +720,7 @@ async function createTimeEntryWithDescription(
 
   // Step 1: Create entry via standard API
   const createResp = await fetch(
-    `${BC_BASE_URL}/companies(name='${BC_COMPANY_NAME}')/timeRegistrationEntries`,
+    `${BC_BASE_URL}/companies(name='${encodeURIComponent(BC_COMPANY_NAME)}')/timeRegistrationEntries`,
     {
       method: 'POST',
       headers: {
@@ -692,38 +734,68 @@ async function createTimeEntryWithDescription(
   const entry = await createResp.json();
   const lineNumber = entry.lineNumber; // e.g., 10000
 
-  // Step 2: Find the matching OData Time Sheet Line
-  const odataBase = `https://api.businesscentral.dynamics.com/v2.0/${BC_TENANT_ID}/${BC_ENVIRONMENT}/ODataV4/Company('${BC_COMPANY_NAME}')`;
-  const filter = `$filter=Line_No eq ${lineNumber} and Job_No eq '${jobNumber}'`;
-  const select = `$select=Time_Sheet_No,Line_No,Description,Chargeable,Work_Type_Code`;
+  // Step 2: Wait for BC to propagate the entry to OData
+  await delay(1500);
 
-  const findResp = await fetch(
-    `${odataBase}/TimeSheetLines?${filter}&${select}`,
+  // Step 3: Find the matching line via TimeSheet header navigation
+  // Use company= as query param to avoid issues with "/" in company names like "A/S"
+  const odataBase = `https://api.businesscentral.dynamics.com/v2.0/${BC_TENANT_ID}/${BC_ENVIRONMENT}/ODataV4`;
+  const companyParam = `company=${encodeURIComponent(BC_COMPANY_NAME)}`;
+
+  // Get recent time sheet headers
+  const headersResp = await fetch(
+    `${odataBase}/TimeSheet?$select=No&$orderby=No desc&$top=20&${companyParam}`,
     {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json',
-      },
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
     }
   );
-  if (!findResp.ok) throw new Error(`OData GET failed: ${findResp.status}`);
-  const findData = await findResp.json();
-  const line = findData.value[0];
-  if (!line) throw new Error('Could not find matching Time Sheet Line via OData');
+  if (!headersResp.ok) throw new Error(`OData TimeSheet GET failed: ${headersResp.status}`);
+  const headersData = await headersResp.json();
 
-  // Step 3: PATCH the missing fields
+  // Search through headers to find our lineNumber (with retry)
+  let matchedLine: any = null;
+  const maxAttempts = 3;
+
+  for (let attempt = 0; attempt < maxAttempts && !matchedLine; attempt++) {
+    if (attempt > 0) await delay(2000 * attempt); // increasing delay on retries
+
+    for (const header of headersData.value) {
+      const tsNo = header.No;
+      try {
+        const linesResp = await fetch(
+          `${odataBase}/TimeSheet(No='${tsNo}')/TimeSheetLines?$top=50&${companyParam}`,
+          {
+            headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
+          }
+        );
+        if (!linesResp.ok) continue;
+        const linesData = await linesResp.json();
+
+        // Find the line with matching Line_No
+        const line = linesData.value?.find((l: any) => l.Line_No === lineNumber);
+        if (line) {
+          matchedLine = { ...line, _tsNo: tsNo };
+          break;
+        }
+      } catch { /* try next header */ }
+    }
+  }
+
+  if (!matchedLine) throw new Error(`Could not find lineNumber=${lineNumber} in any TimeSheet after ${maxAttempts} attempts`);
+
+  // Step 4: PATCH the missing fields
   const patchBody: Record<string, any> = { Description: description };
   if (chargeable !== undefined) patchBody.Chargeable = chargeable;
   if (workTypeCode) patchBody.Work_Type_Code = workTypeCode;
 
   const patchResp = await fetch(
-    `${odataBase}/TimeSheetLines(Time_Sheet_No='${line.Time_Sheet_No}',Line_No=${line.Line_No})`,
+    `${odataBase}/TimeSheet(No='${matchedLine._tsNo}')/TimeSheetLines(Line_No=${matchedLine.Line_No})?${companyParam}`,
     {
       method: 'PATCH',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
-        'If-Match': findData.value[0]['@odata.etag'],
+        'If-Match': matchedLine['@odata.etag'],
         'Accept': 'application/json',
       },
       body: JSON.stringify(patchBody),
@@ -767,7 +839,7 @@ OData uses underscores, not camelCase. Here is the mapping:
 
 | Problem | Cause | Fix |
 |---|---|---|
-| 404 on OData URL | Web service not published | BC admin must publish Page 951 as `TimeSheetLines` (see setup above) |
+| 404 on OData URL | Web service not published | BC admin must publish Page 951 as `TimeSheet` in BC → Web Services (see setup above) |
 | HTML returned instead of JSON | Missing `Accept: application/json` header | Add `Accept: application/json` to every OData request |
 | Can't PATCH Description | Time Sheet Line status is not Open | Only `Open` lines can be edited — same restriction as standard API |
 | Empty result on GET | Wrong filter values | Verify `Time_Sheet_No` and `Line_No` match — use the `lineNumber` from the standard API response |
