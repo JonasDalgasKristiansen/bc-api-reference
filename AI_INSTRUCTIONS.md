@@ -72,14 +72,36 @@ Automation API: https://api.businesscentral.dynamics.com/v2.0/{BC_TENANT_ID}/{BC
 
 ### Company context
 
-Almost all endpoints require a company context. Always use the company **name** (not a GUID):
+Almost all endpoints require a company context. **Always resolve the company GUID first, then use the GUID in all subsequent calls.** Do not embed the company name directly in API URLs.
 
+Company names like `CRONUS Danmark A/S` contain characters (spaces, `/`) that break URL paths even after `encodeURIComponent` — because HTTP proxies and load balancers often decode `%2F` back to `/` before the request reaches BC, splitting the path.
+
+**✅ Correct pattern — resolve GUID once at startup, reuse everywhere:**
+
+```typescript
+// Step 1: resolve company GUID by name (done once, result cached)
+async function resolveCompanyId(companyName: string): Promise<string> {
+  const token = await getToken();
+  const url = `${BASE_URL}/companies?$filter=name eq '${encodeURIComponent(companyName)}'&$select=id,name`;
+  const resp = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  const data = await resp.json();
+  const company = data.value?.[0];
+  if (!company) throw new Error(`Company '${companyName}' not found`);
+  return company.id; // a safe GUID — no special characters
+}
+
+// Step 2: use GUID in all subsequent calls
+const companyId = await resolveCompanyId(BC_COMPANY_NAME);
+const baseUrl = `${BASE_URL}/companies(${companyId})`;
+
+// All calls then use the GUID-based base URL:
+// `${baseUrl}/customers`
+// `${baseUrl}/items`
+// `${baseUrl}/salesOrders`
+// etc.
 ```
-/companies(name='{BC_COMPANY_NAME}')/customers
-/companies(name='{BC_COMPANY_NAME}')/salesInvoices
-/companies(name='{BC_COMPANY_NAME}')/items
-... etc.
-```
+
+Cache `companyId` for the lifetime of the token. Re-resolve if the token is refreshed.
 
 ---
 
@@ -93,7 +115,7 @@ Common mistakes to avoid:
 - ❌ `lastModifiedDateTime` → ✅ `lastModfiedDateTime` (Microsoft's typo — use it as-is)
 - ❌ `commissionPercent` → ✅ `commisionPercent` (Microsoft's typo — use it as-is)
 - ❌ `companies({guid})` → ✅ `companies(name='{BC_COMPANY_NAME}')`
-- ❌ `companies(name='${BC_COMPANY_NAME}')` → ✅ `companies(name='${encodeURIComponent(BC_COMPANY_NAME)}')` (always URL-encode the company name — names like `CRONUS Danmark A/S` contain spaces and special characters that break the URL without encoding. The single quotes must wrap the encoded value, not the raw string)
+- ❌ Embedding company name in URLs → ✅ Resolve company GUID first via `GET /companies?$filter=name eq '...'`, then use the GUID in all calls: `companies(${companyId})`. Company names like `CRONUS Danmark A/S` contain `/` which breaks URL paths even after encoding.
 - ❌ `/jobs` → ✅ `/projects` (v22.0+) or OData `/Jobs` web service (all versions)
 - ❌ POST to `/employees({id})/timeRegistrationEntries` → ✅ POST to `/timeRegistrationEntries` (top-level)
 - ❌ `employeeId` in POST body → ✅ `employeeNumber` in POST body (short code like `"MH"`, not a GUID)
@@ -215,9 +237,27 @@ async function getToken(): Promise<string> {
 ```typescript
 const BASE_URL = `https://api.businesscentral.dynamics.com/v2.0/${BC_TENANT_ID}/${BC_ENVIRONMENT}/api/v2.0`;
 
+// Resolve company GUID once — never embed the company name in API URLs directly.
+// Names like "CRONUS Danmark A/S" contain "/" which breaks URL paths even after encoding.
+let companyBaseUrl: string | null = null;
+async function getCompanyBaseUrl(): Promise<string> {
+  if (companyBaseUrl) return companyBaseUrl;
+  const token = await getToken();
+  const resp = await fetch(
+    `${BASE_URL}/companies?$filter=name eq '${encodeURIComponent(BC_COMPANY_NAME)}'&$select=id`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  const data = await resp.json();
+  const id = data.value?.[0]?.id;
+  if (!id) throw new Error(`Company '${BC_COMPANY_NAME}' not found`);
+  companyBaseUrl = `${BASE_URL}/companies(${id})`;
+  return companyBaseUrl;
+}
+
 async function bcGet(path: string): Promise<any> {
   const token = await getToken();
-  const resp = await fetch(`${BASE_URL}/companies(name='${encodeURIComponent(BC_COMPANY_NAME)}')${path}`, {
+  const base = await getCompanyBaseUrl();
+  const resp = await fetch(`${base}${path}`, {
     headers: {
       'Authorization': `Bearer ${token}`,
       'Accept': 'application/json',
@@ -235,7 +275,8 @@ const customers = await bcGet("/customers?$select=number,displayName,email,balan
 ```typescript
 async function bcPatch(path: string, etag: string, body: object): Promise<any> {
   const token = await getToken();
-  const resp = await fetch(`${BASE_URL}/companies(name='${encodeURIComponent(BC_COMPANY_NAME)}')${path}`, {
+  const base = await getCompanyBaseUrl();
+  const resp = await fetch(`${base}${path}`, {
     method: 'PATCH',
     headers: {
       'Authorization': `Bearer ${token}`,
