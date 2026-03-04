@@ -425,6 +425,37 @@ When updating (PATCH) or deleting (DELETE) **draft** invoices or their lines, in
 
 ---
 
+## POS Export Pattern
+
+When exporting offline POS sales to BC, use `salesInvoices` directly — not `salesOrders` + `shipAndInvoice`. The recommended flow is:
+
+**1. Idempotency check**
+Before creating anything, query for an existing invoice by `externalDocumentNumber`:
+```http
+GET .../salesInvoices?$filter=externalDocumentNumber eq 'POS-00001'
+```
+If any result is returned (draft or posted), skip creation. This prevents duplicates on retry.
+
+**2. Create draft, add lines, post and send**
+```http
+POST .../salesInvoices                                          # create draft
+POST .../salesInvoices({id})/salesInvoiceLines                 # add lines (draft only)
+POST .../salesInvoices({id})/Microsoft.NAV.postAndSend         # post + email in one step
+```
+Use `Microsoft.NAV.post` instead of `postAndSend` if the customer has no email address.
+
+**3. Post-and-verify**
+BC sometimes returns an error response from `postAndSend` even when the invoice was actually posted. After any failure, always re-query before marking the export as failed:
+```http
+GET .../salesInvoices?$filter=externalDocumentNumber eq 'POS-00001'
+```
+If the invoice exists with status `Open` or `Paid`, it posted successfully — treat it as synced.
+
+**4. Non-JSON responses**
+BC can return HTML error pages (not JSON) during outages or proxy errors. Always check `Content-Type` before calling `.json()` on the response to avoid silent parse failures masking the real error.
+
+---
+
 ## Common Errors
 
 | Status | Error                  | Cause & Resolution                                                                         |

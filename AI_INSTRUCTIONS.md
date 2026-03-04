@@ -362,7 +362,11 @@ This pattern applies to customers, items, payment methods, tax groups, and any o
 2. **Make real API calls** — never mock data
 3. **Use server-side code** for authentication — never expose client_secret to browsers
 4. **Use exact field names** from the resource `.md` files
-5. **Use company name** in URLs, not GUIDs: `companies(name='{BC_COMPANY_NAME}')`
+5. **Resolve company GUID first** — never embed company name in URLs. Use `GET /companies?$filter=name eq '...'` to get the GUID, then `companies({guid})` in all calls
 6. **Cache tokens** and refresh before expiry
 7. **Read the specific resource file** for the endpoint you're working with — it has all the fields, examples, and gotchas
 8. **Resolve BC IDs before exporting** — never send local DB primary keys to BC (see Rule 8)
+9. **Handle non-JSON BC responses** — always check `Content-Type` before parsing BC responses as JSON; BC can return HTML error pages during outages
+10. **Post-and-verify on invoice posting** — BC sometimes returns an error even when posting succeeds; always re-query by `externalDocumentNumber` to confirm real state before marking an export as failed
+11. **Idempotent exports** — before creating any invoice, check both draft and posted invoices for the `externalDocumentNumber`; skip creation if found
+12. **Retry failed exports** — export queues must pick up both `pending` and `failed` status transactions

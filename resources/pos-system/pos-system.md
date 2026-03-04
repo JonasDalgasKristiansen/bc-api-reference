@@ -213,42 +213,61 @@ Both `customer_id` (BC GUID) and `customer_number` (e.g. `"10000"`) must be save
 
 ---
 
-## Export Flow: Sales Order → Ship & Invoice → Email
+## Export Flow: Sales Invoice → Post → Send
 
-When the cashier clicks "Export to BC", each pending sale goes through these steps automatically:
+When the cashier clicks "Export to BC", each pending sale goes through these steps automatically. **Use `salesInvoices` directly — not `salesOrders` + `shipAndInvoice`.** The Sales Order approach has proven unreliable with the BC API actions; the invoice approach is simpler and more predictable.
 
-**1. Create Sales Order** — `POST /salesOrders`
-The sale is posted to BC as a Sales Order using the BC customer number and the POS sale number as `externalDocumentNumber` (used for idempotency).
+**1. Idempotency check** — before creating anything, query BC to see if an invoice already exists for this sale:
+```
+GET /salesInvoices?$filter=externalDocumentNumber eq '{saleNumber}'
+```
+If a result is found (any status), skip creation entirely. This prevents duplicates on retry. Also check for already-posted invoices if your platform uses a separate `postedSalesInvoices` endpoint.
 
-**2. Add order lines** — `POST /salesOrders({id})/salesOrderLines`
-One line per item, identified by BC item GUID (`itemId`). BC auto-fills the item number and description from its own item master.
+**2. Create draft Sales Invoice** — `POST /salesInvoices`
+Use the BC customer number (resolved from local mirror) and the POS sale number as `externalDocumentNumber`.
 
-**3. Ship and Invoice** — `POST /salesOrders({id})/Microsoft.NAV.shipAndInvoice`
-This single action ships all items and posts the invoice in one step. The Sales Order is consumed — BC creates a Sales Shipment and a Posted Sales Invoice automatically. Returns `204 No Content`.
+**3. Add invoice lines** — `POST /salesInvoices({id})/salesInvoiceLines`
+One line per item, identified by BC item GUID (`itemId`). BC auto-fills the item number and description from its own item master. Only works while the invoice is in `Draft` status.
 
-**4. Find the Posted Invoice** — `GET /salesInvoices?$filter=externalDocumentNumber eq '{saleNumber}'`
-Because `shipAndInvoice` returns no body, we query for the resulting Posted Sales Invoice by `externalDocumentNumber` to get its ID and number for local storage.
+**4. Post and Send** — `POST /salesInvoices({id})/Microsoft.NAV.postAndSend`
+Posts the invoice and emails it to the customer in one step. Returns `204 No Content`. If the customer has no email, use `Microsoft.NAV.post` instead to post without sending. See `resources/sales/sales-invoices.md` for both actions.
 
-**5. Send invoice by email** — `POST /salesInvoices({id})/Microsoft.NAV.send`
-If the customer has an email address on their BC record, BC sends the posted invoice automatically using its own SMTP setup and invoice template. Walk-in / cash sales with no customer are silently skipped. This step is non-fatal — if it fails, the sale remains marked as synced.
+**5. Post-and-verify** — BC sometimes returns an error response even when the invoice actually posted successfully. After any failure on step 4, always query BC to check the real state before marking the export as failed:
+```
+GET /salesInvoices?$filter=externalDocumentNumber eq '{saleNumber}'
+```
+If the invoice exists and status is not `Draft`, it was posted successfully — mark the sale as synced regardless of the error response.
 
-**Result in BC:** A Posted Sales Invoice in status `Open`, inventory adjusted, shipment recorded, and invoice emailed to the customer — all from a single button click on the POS.
+**6. Retry** — the export must pick up both `pending` and `failed` status transactions so failed exports are automatically retried on the next export run.
 
-The local `sales` table stores both `bc_sales_order_id` / `bc_sales_order_number` and `bc_posted_invoice_id` / `bc_posted_invoice_number` for full traceability.
+**Result in BC:** A Posted Sales Invoice in status `Open`, emailed to the customer — all from a single button click on the POS.
+
+The local `sales` table stores `bc_posted_invoice_id` and `bc_posted_invoice_number` for full traceability.
 
 ---
 
 ## Known Export Pitfalls
 
-Two bugs that commonly break the BC export — both fixed in `syncService.js`:
+**1. Wrong customer identifier**
+`customerNumber` must be the BC customer number (e.g. `"10000"`), not a local UUID. Always look it up from the local `customers` table using `customer_id` before creating the invoice.
 
-**1. Wrong customer identifier on Sales Order header**
-The `customerNumber` sent to BC must be the BC customer number (e.g. `"10000"`), not a GUID or a stale cached value. Always look it up from the local `customers` table using `customer_id` (the BC GUID) before calling `bcPost('/salesOrders', ...)`.
+**2. Wrong item identifier on invoice lines**
+Lines must use `itemId` set to the BC item GUID — never a local database UUID. BC uses the GUID to auto-fill the item number and description. A local UUID produces a line with no item.
 
-**2. Wrong item identifier on Sales Order Lines**
-Order lines must be created with `itemId` set to the BC item GUID — never a local database UUID. `items.id` in this schema stores the BC GUID directly. Always pass `itemId: line.item_id` (with a number-based fallback via the `items` table) so BC can auto-fill the item number and description. Sending an unrecognised UUID results in a line with no item.
+**3. Company name in URLs breaks with special characters**
+Never embed the company name directly in API URL paths. Names like `CRONUS Danmark A/S` contain `/` which breaks the URL path even after `encodeURIComponent` — proxies decode `%2F` back to `/`. Always resolve the company GUID first via `GET /companies?$filter=name eq '...'` and use the GUID in all subsequent calls.
 
-**Pattern:** before any export, resolve BC identifiers (GUIDs / numbers) from the local mirror. Never trust IDs stored at transaction time.
+**4. BC returns errors even when posting succeeds**
+The `postAndSend` action sometimes returns an error response even though the invoice was actually posted. Always query `GET /salesInvoices?$filter=externalDocumentNumber eq '{saleNumber}'` after any failure to check the real state before marking the export as failed.
+
+**5. Duplicate exports on retry**
+Always check for an existing invoice by `externalDocumentNumber` before creating a new one. Check both draft and posted invoices. If one exists, skip creation entirely.
+
+**6. Non-JSON error responses from BC**
+BC occasionally returns HTML error pages instead of JSON (e.g. during outages or proxy errors). Your `bcFetch()` wrapper must check `Content-Type` before calling `.json()` — otherwise the JSON parse error silently swallows the real error message.
+
+**7. Failed exports not retried**
+The export queue must pick up both `pending` and `failed` status transactions. If only `pending` is queried, failed exports are never retried.
 
 ## BC API Reference
 
