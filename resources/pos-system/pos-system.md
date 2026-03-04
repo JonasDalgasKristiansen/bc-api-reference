@@ -246,6 +246,27 @@ The local `sales` table stores `bc_posted_invoice_id` and `bc_posted_invoice_num
 
 ---
 
+## Inventory Sync
+
+### Local inventory at checkout
+When a sale is completed, immediately decrement the local inventory count for each item sold. This is a local DB operation — no BC call needed. Do not wait until export.
+
+### Re-sync after export
+After each successful export run, trigger a background re-import of items from BC and overwrite local inventory counts with the values returned. The `inventory` field on BC's `/items` endpoint is **read-only** — BC calculates it automatically from item ledger entries when an invoice is posted. Make sure `inventory` is included in the `$select` when importing items and that the local upsert overwrites it:
+```
+GET /items?$select=id,number,displayName,unitPrice,inventory,blocked,...
+```
+
+### BC inventory not reducing after export
+If inventory counts in BC don't go down after a posted invoice, the item **Type** in BC is wrong. Check the item card in BC:
+- `Type: Inventory` → stock moves ✅
+- `Type: Service` → stock never moves ❌
+- `Type: Non-Inventory` → stock never moves ❌
+
+Only `Inventory` type items create item ledger entries on posting. This must be set on the item card in BC — it cannot be changed via the API.
+
+---
+
 ## Known Export Pitfalls
 
 **1. Wrong customer identifier**
