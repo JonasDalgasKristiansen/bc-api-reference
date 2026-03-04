@@ -93,6 +93,7 @@ Common mistakes to avoid:
 - ❌ `lastModifiedDateTime` → ✅ `lastModfiedDateTime` (Microsoft's typo — use it as-is)
 - ❌ `commissionPercent` → ✅ `commisionPercent` (Microsoft's typo — use it as-is)
 - ❌ `companies({guid})` → ✅ `companies(name='{BC_COMPANY_NAME}')`
+- ❌ `companies(name='${BC_COMPANY_NAME}')` → ✅ `companies(name='${encodeURIComponent(BC_COMPANY_NAME)}')` (always URL-encode the company name — names like `CRONUS Danmark A/S` contain spaces and special characters that break the URL without encoding. The single quotes must wrap the encoded value, not the raw string)
 - ❌ `/jobs` → ✅ `/projects` (v22.0+) or OData `/Jobs` web service (all versions)
 - ❌ POST to `/employees({id})/timeRegistrationEntries` → ✅ POST to `/timeRegistrationEntries` (top-level)
 - ❌ `employeeId` in POST body → ✅ `employeeNumber` in POST body (short code like `"MH"`, not a GUID)
@@ -216,7 +217,7 @@ const BASE_URL = `https://api.businesscentral.dynamics.com/v2.0/${BC_TENANT_ID}/
 
 async function bcGet(path: string): Promise<any> {
   const token = await getToken();
-  const resp = await fetch(`${BASE_URL}/companies(name='${BC_COMPANY_NAME}')${path}`, {
+  const resp = await fetch(`${BASE_URL}/companies(name='${encodeURIComponent(BC_COMPANY_NAME)}')${path}`, {
     headers: {
       'Authorization': `Bearer ${token}`,
       'Accept': 'application/json',
@@ -234,7 +235,7 @@ const customers = await bcGet("/customers?$select=number,displayName,email,balan
 ```typescript
 async function bcPatch(path: string, etag: string, body: object): Promise<any> {
   const token = await getToken();
-  const resp = await fetch(`${BASE_URL}/companies(name='${BC_COMPANY_NAME}')${path}`, {
+  const resp = await fetch(`${BASE_URL}/companies(name='${encodeURIComponent(BC_COMPANY_NAME)}')${path}`, {
     method: 'PATCH',
     headers: {
       'Authorization': `Bearer ${token}`,
