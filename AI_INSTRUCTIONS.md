@@ -119,6 +119,7 @@ Common mistakes to avoid:
 - ❌ `/jobs` → ✅ `/projects` (v22.0+) or OData `/Jobs` web service (all versions)
 - ❌ POST to `/employees({id})/timeRegistrationEntries` → ✅ POST to `/timeRegistrationEntries` (top-level)
 - ❌ `employeeId` in POST body → ✅ `employeeNumber` in POST body (short code like `"MH"`, not a GUID)
+- ❌ `$select=...,balance` on customers → ✅ omit `balance`, `overdueAmount`, and `totalSalesExcludingTax` from `$select` entirely — these computed fields cause a 400 error in some BC configurations when explicitly selected. They are returned automatically in the default response, or use `$expand=customerFinancialDetails` if you specifically need them.
 - ❌ `jobId` in POST body → ✅ `jobNumber` in POST body. `jobId` is read-only (auto-set by BC from `jobNumber`). Sending a non-GUID `jobId` causes BC to silently ignore the project assignment. Only use `jobNumber`.
 
 ### Time Registration Entries — CRITICAL

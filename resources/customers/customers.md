@@ -237,9 +237,9 @@ If-Match: W/"JzE5OzEyMzQ1Njc4OTA7REFWSUQ7Jw=="
 | `shipmentMethodId`        | GUID     | Yes      | Shipment method identifier                               |
 | `paymentMethodId`         | GUID     | Yes      | Payment method identifier                                |
 | `blocked`                 | string   | Yes      | Blank (` `) = not blocked, `Ship`, `Invoice`, `All`      |
-| `balance`                 | decimal  | No       | Current outstanding balance (read-only)                  |
-| `overdueAmount`           | decimal  | No       | Overdue amount (read-only)                               |
-| `totalSalesExcludingTax`  | decimal  | No       | Lifetime sales excluding tax (read-only)                 |
+| `balance`                 | decimal  | No       | Current outstanding balance (read-only). ⚠️ Do not include in `$select` — omit it or use `$expand=customerFinancialDetails` instead. Including it in `$select` causes a 400 error in some BC configurations. |
+| `overdueAmount`           | decimal  | No       | Overdue amount (read-only). Same warning as `balance` — omit from `$select`. |
+| `totalSalesExcludingTax`  | decimal  | No       | Lifetime sales excluding tax (read-only). Same warning as `balance` — omit from `$select`. |
 | `lastModifiedDateTime`    | datetime | No       | Last modification timestamp                              |
 
 ---
