@@ -111,7 +111,7 @@ The resource `.md` files in this repo document the **exact** field names, data t
 
 Common mistakes to avoid:
 - ❌ `jobNo` → ✅ `jobNumber`
-- ❌ `jobTaskNo` → ✅ `jobTaskNumber`  
+- ❌ `jobTaskNo` → ✅ `jobTaskNumber`
 - ❌ `lastModifiedDateTime` → ✅ `lastModfiedDateTime` (Microsoft's typo — use it as-is)
 - ❌ `commissionPercent` → ✅ `commisionPercent` (Microsoft's typo — use it as-is)
 - ❌ `companies({guid})` → ✅ `companies(name='{BC_COMPANY_NAME}')`
@@ -121,6 +121,28 @@ Common mistakes to avoid:
 - ❌ `employeeId` in POST body → ✅ `employeeNumber` in POST body (short code like `"MH"`, not a GUID)
 - ❌ `$select=...,balance` on customers → ✅ omit `balance`, `overdueAmount`, and `totalSalesExcludingTax` from `$select` entirely — these computed fields cause a 400 error in some BC configurations when explicitly selected. They are returned automatically in the default response, or use `$expand=customerFinancialDetails` if you specifically need them.
 - ❌ `jobId` in POST body → ✅ `jobNumber` in POST body. `jobId` is read-only (auto-set by BC from `jobNumber`). Sending a non-GUID `jobId` causes BC to silently ignore the project assignment. Only use `jobNumber`.
+- ❌ `description` on items → ✅ `displayName`. BC items have **no** `description` field in the v2.0 API. The item name field is `displayName`. Do not use `description` in `$select`, POST bodies, or upserts — it does not exist and will cause a 400 error.
+
+### ⚠️ POS System — Correct Import Queries
+
+When building a POS system that mirrors BC data locally, use these exact queries:
+
+**Items import** — use `displayName`, never `description`:
+```
+GET /items?$select=id,number,displayName,unitPrice,inventory,gtin,taxGroupCode,itemCategoryCode,blocked,type,baseUnitOfMeasureCode
+```
+
+**Customers import** — omit `balance`, `overdueAmount`, `totalSalesExcludingTax` from `$select` or they will 400:
+```
+GET /customers?$select=id,number,displayName,email,phoneNumber,addressLine1,addressLine2,city,state,country,postalCode,blocked,currencyCode
+```
+
+**Tax groups import:**
+```
+GET /taxGroups?$select=id,code,displayName,taxType
+```
+
+These three queries are the safe, verified patterns. Any deviation — adding `description`, adding `balance` — will cause a BC 400 error.
 
 ### Time Registration Entries — CRITICAL
 

@@ -4,6 +4,25 @@ Customers represent the people or organizations that purchase goods and services
 
 ---
 
+## ⚠️ Fields That Must NOT Be Used in `$select`
+
+The following fields are **computed** and cause a `400 Bad Request` in many BC configurations when included in `$select`:
+
+| Field                    | Do NOT use in `$select` | Workaround                                   |
+|--------------------------|--------------------------|----------------------------------------------|
+| `balance`                | ❌                       | Omit from `$select`, or `$expand=customerFinancialDetails` |
+| `overdueAmount`          | ❌                       | Omit from `$select`, or `$expand=customerFinancialDetails` |
+| `totalSalesExcludingTax` | ❌                       | Omit from `$select`, or `$expand=customerFinancialDetails` |
+
+These fields **are** returned automatically when you do a GET without `$select`. Only include them in `$select` if you know your BC environment supports it, which many do not.
+
+**Safe customer import query:**
+```
+GET /customers?$select=id,number,displayName,email,phoneNumber,addressLine1,addressLine2,city,state,country,postalCode,blocked,currencyCode
+```
+
+---
+
 ## Base Endpoint
 
 ```

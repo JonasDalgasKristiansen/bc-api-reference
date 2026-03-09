@@ -212,6 +212,18 @@ If-Match: W/"JzE5OzExMTExMTExMTE7SVRFTTE7Jw=="
 
 ---
 
+## ⚠️ Common Field Name Mistakes
+
+> **There is NO `description` field on BC items in the v2.0 API.**
+> The item name field is **`displayName`**. Using `description` in `$select`, POST bodies, or local upserts will cause a `400 Bad Request` error from BC.
+>
+> **There is also NO `name` field.** Always use `displayName`.
+>
+> Correct: `$select=id,number,displayName,unitPrice,inventory,gtin,...`
+> Wrong:   `$select=id,number,description,unitPrice,inventory,gtin,...` ← 400 error
+
+---
+
 ## Fields
 
 | Field                             | Type     | Writable | Description                                              |
