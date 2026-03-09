@@ -125,6 +125,31 @@ pos-system/
 └── README.md
 ```
 
+## ⚠️ BC Import — Correct Field Names
+
+When importing from BC into the local database, use these exact queries. Any deviation will cause BC to return a `400 Bad Request`.
+
+### Items — correct import query
+```
+GET /items?$select=id,number,displayName,unitPrice,inventory,gtin,taxGroupCode,itemCategoryCode,blocked,type,baseUnitOfMeasureCode
+```
+- Use `displayName` for the item name — **there is no `description` field on BC items**
+- `inventory` is read-only (auto-calculated by BC) — do not try to write it
+
+### Customers — correct import query
+```
+GET /customers?$select=id,number,displayName,email,phoneNumber,addressLine1,addressLine2,city,state,country,postalCode,blocked,currencyCode
+```
+- **Never include `balance`, `overdueAmount`, or `totalSalesExcludingTax` in `$select`** — these computed fields cause a `400 Bad Request` in many BC configurations
+- Those fields are returned automatically in the full response (without `$select`), or use `$expand=customerFinancialDetails` if you specifically need them
+
+### Tax groups — correct import query
+```
+GET /taxGroups?$select=id,code,displayName,taxType
+```
+
+---
+
 ## API Endpoints
 
 ### Products (offline, local DB)
@@ -253,9 +278,12 @@ When a sale is completed, immediately decrement the local inventory count for ea
 
 ### Re-sync after export
 After each successful export run, trigger a background re-import of items from BC and overwrite local inventory counts with the values returned. The `inventory` field on BC's `/items` endpoint is **read-only** — BC calculates it automatically from item ledger entries when an invoice is posted. Make sure `inventory` is included in the `$select` when importing items and that the local upsert overwrites it:
+
 ```
-GET /items?$select=id,number,displayName,unitPrice,inventory,blocked,...
+GET /items?$select=id,number,displayName,unitPrice,inventory,gtin,taxGroupCode,itemCategoryCode,blocked,type,baseUnitOfMeasureCode
 ```
+
+> **⚠️ Field name warning:** The item name field is `displayName` — there is **no** `description` field on BC items. Using `description` in `$select` or in your local upsert will cause a `400 Bad Request`.
 
 ### BC inventory not reducing after export
 If inventory counts in BC don't go down after a posted invoice, the item **Type** in BC is wrong. Check the item card in BC:
