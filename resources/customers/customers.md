@@ -380,6 +380,23 @@ Content-Type: application/json
 - `country` must be a 2-letter ISO code (`"DK"`, `"US"`, `"GB"`, etc.)
 - Auto-select the newly created customer for the active sale immediately after writing to the local table
 
+### ⚠️ BC Prerequisite — Gen. Bus. Posting Group
+
+The standard BC REST API v2.0 does **not** expose `generalBusinessPostingGroupCode` as a writable field on customers. This means the POS cannot set it programmatically when creating a walk-in customer.
+
+**If this field is missing on a new customer, BC will reject the Sales Invoice with an error like:**
+> *"Gen. Bus. Posting Group must have a value in Customer"*
+
+**Fix — BC admin must configure a default before the POS can create customers:**
+
+1. Open Business Central → **Sales & Receivables Setup**
+2. Set a value in **Gen. Bus. Posting Group** (e.g. `DOMESTIC`, `EU`, or whatever your company uses)
+3. This default is applied automatically to every new customer created via the API
+
+Alternatively, set up a **Customer Template** in BC with the posting group pre-filled, so all API-created customers inherit it.
+
+**The POS admin dashboard should check for this and warn the user if customer creation is enabled but BC has no default posting group configured.**
+
 ---
 
 ## ETag / If-Match
