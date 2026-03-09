@@ -429,11 +429,11 @@ When a customer is created via the walk-in wizard, BC creates the customer recor
 > *"Gen. Bus. Posting Group must have a value in Customer"*
 
 This is a **BC configuration issue, not a code bug.** The fix is:
-- Open BC → **Sales & Receivables Setup** → set a default **Gen. Bus. Posting Group** (e.g. `DOMESTIC`)
-- OR set up a **Customer Template** in BC with the posting group pre-filled
+- Open BC → **Customer Templates** → create a template (code: `POS-WALKIN`) with **Gen. Bus. Posting Group**, **Customer Posting Group**, **VAT Bus. Posting Group**, and **Payment Terms** pre-filled
+- Setting a default in Sales & Receivables Setup alone does not reliably propagate to API-created customers — the Customer Template is the correct mechanism
 
 When the export fails with this error, surface it clearly to the cashier with the message:
-> *"Invoice rejected: customer is missing a General Business Posting Group in Business Central. Ask your BC administrator to set a default posting group in Sales & Receivables Setup."*
+> *"Invoice rejected: customer is missing a General Business Posting Group in Business Central. Ask your BC administrator to set up the POS-WALKIN Customer Template."*
 
 The admin dashboard should display a warning if any sale fails export with this error code.
 
@@ -445,10 +445,11 @@ Before the POS can create customers and post invoices reliably, a BC administrat
 
 | Setting | Where in BC | Why it matters |
 |---------|-------------|----------------|
-| **Gen. Bus. Posting Group** default | Sales & Receivables Setup | Required on every customer — API cannot set it. Without it, all invoices for API-created customers will be rejected |
-| **Customer Posting Group** default | Sales & Receivables Setup | Required for posting invoices to the correct receivables account |
-| **VAT Bus. Posting Group** default | Sales & Receivables Setup | Required for correct VAT calculation on invoices |
-| **Payment Terms** | Payment Terms list | Recommended — without it invoices have no due date |
+| **Customer Template (`POS-WALKIN`)** | Customer Templates | **Primary fix** — sets Gen. Bus. Posting Group, Customer Posting Group, VAT Bus. Posting Group, and Payment Terms for all API-created customers. Without this, walk-in customer invoices will be rejected by BC |
+| **Gen. Bus. Posting Group** | Set on `POS-WALKIN` template | Required on every customer — API cannot set it. Without it: *"Gen. Bus. Posting Group must have a value in Customer"* |
+| **Customer Posting Group** | Set on `POS-WALKIN` template | Required for posting invoices to the correct receivables account |
+| **VAT Bus. Posting Group** | Set on `POS-WALKIN` template | Required for correct VAT calculation on invoices |
+| **Payment Terms** | Set on `POS-WALKIN` template | Without it, invoices have no due date |
 | **Item Type = Inventory** | Item card per item | Required for inventory to reduce when invoices are posted. `Service` and `Non-Inventory` items do not affect stock |
 
 The POS admin dashboard should display this checklist and ideally test-create a dummy customer on first setup to verify BC is correctly configured.
