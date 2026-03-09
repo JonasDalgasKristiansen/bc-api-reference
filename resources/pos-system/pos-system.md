@@ -213,28 +213,94 @@ When the cashier presses **"Checkout"**, a step-by-step wizard opens (modal or f
 **Step 1 — Customer**
 **Step 2 — Payment**
 
-The cashier cannot skip to payment without passing through the customer step first. A "Skip" or "Walk-in" option must be clearly available on Step 1 for anonymous sales.
+The cashier cannot skip to payment without passing through the customer step first.
 
-The checkout flow should include:
+Step 1 presents three clearly visible options:
 
-### Selecting an existing customer
+| Option | Label | Behaviour |
+|--------|-------|-----------|
+| 1 | Search & select existing customer | Filter local `customers` table — no BC call |
+| 2 | **Walk-in Customer** | Opens a quick-create wizard → POSTs to BC → auto-selects the new customer |
+| 3 | **Continue Anonymous** | No customer attached — sale is saved with null customer fields |
+
+---
+
+### Option 1 — Selecting an existing customer
 - A search field that filters the local `customers` table by name, email, or phone (no BC call)
-- Results shown as a scrollable list below the search field — the list must have a fixed max height with overflow scroll so it works with large customer databases
+- Results shown as a scrollable list below the search field — fixed max height with overflow scroll
 - The currently selected customer is highlighted in the list
-- Walk-in sales (no customer) must always be allowed — selecting a customer is optional
 
-### Creating a new customer inline
-- A **"+ New Customer"** button opens a modal/drawer without leaving the checkout
-- Required field: **Name** (`displayName`)
-- Optional fields: Email, Phone, Address Line 1, City, Country, Postal Code
-- On save:
-  1. `POST /customers` to Business Central with the entered data (see `resources/customers/customers.md` — `displayName` is the only required field)
-  2. Write the BC response (including the assigned BC `id` and `number`) into the local `customers` table immediately
-  3. Auto-select the new customer on the current sale so checkout can proceed
-- If BC is offline when the cashier tries to create a customer, show a clear error and allow the sale to continue as walk-in
+---
+
+### Option 2 — Walk-in Customer wizard
+
+When the cashier clicks **"Walk-in Customer"**, a creation wizard opens (modal or inline panel) without leaving the checkout flow.
+
+**Fields in the wizard:**
+
+| Field | BC field | Required |
+|-------|----------|----------|
+| Name | `displayName` | ✅ Yes |
+| Email | `email` | Optional |
+| Phone | `phoneNumber` | Optional |
+| Address | `addressLine1` | Optional |
+| City | `city` | Optional |
+| Country | `country` | Optional |
+| Postal Code | `postalCode` | Optional |
+
+**On save — exact BC POST request:**
+```http
+POST /companies({companyId})/customers
+Content-Type: application/json
+
+{
+  "displayName": "John Smith",
+  "email": "john@example.com",
+  "phoneNumber": "+45 12 34 56 78",
+  "addressLine1": "Main Street 1",
+  "city": "Copenhagen",
+  "country": "DK",
+  "postalCode": "1000"
+}
+```
+
+**BC response fields to store locally:**
+```json
+{
+  "id": "f3a4b5c6-d7e8-9012-3456-7890abcdef12",
+  "number": "30000",
+  "displayName": "John Smith",
+  "email": "john@example.com"
+}
+```
+
+**Full save flow:**
+1. `POST /companies({companyId})/customers` with the entered data
+2. Write the full BC response into the local `customers` table (store `id`, `number`, `displayName`, `email`, `phoneNumber`, `addressLine1`, `city`, `country`, `postalCode`)
+3. Auto-select the new customer for the current sale — proceed directly to Step 2 (Payment)
+
+**If BC is offline:**
+- Show a clear error message: *"Could not create customer — BC is unreachable"*
+- Offer two options: **Retry** or **Continue Anonymous**
+- Do not block the sale — the cashier must be able to continue
+
+**Field rules (from the BC API):**
+- `displayName` is the **only required field** — all others are optional
+- Do **not** send `balance`, `overdueAmount`, or `totalSalesExcludingTax` — these are read-only computed fields
+- Do **not** send a `number` — BC assigns it automatically
+- `country` must be a 2-letter ISO code (e.g. `"DK"`, `"US"`, `"GB"`)
+
+---
+
+### Option 3 — Continue Anonymous
+- No customer is attached to the sale
+- `customer_id` and `customer_number` are stored as `null` on the sale record
+- On export: use the BC default walk-in customer number (configured in admin settings, e.g. `"10000"`) as the `customerNumber` on the Sales Invoice
+
+---
 
 ### Data stored on the sale
-Both `customer_id` (BC GUID) and `customer_number` (e.g. `"10000"`) must be saved on the sale record so the export can resolve the correct BC identifier later. See **Known Export Pitfalls** below.
+`customer_id` (BC GUID) and `customer_number` (e.g. `"30000"`) must both be saved on the sale record. The export always resolves `customerNumber` from the local `customers` table using `customer_id` — never trusts what was stored at checkout time. See **Known Export Pitfalls** below.
 
 ---
 

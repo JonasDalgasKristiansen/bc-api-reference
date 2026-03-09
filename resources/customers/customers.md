@@ -328,6 +328,60 @@ GET {{BC_BASE_URL}}/companies(name='{{BC_COMPANY_NAME}}')/customers?$filter=bloc
 
 ---
 
+## POS Walk-in Customer — Quick Create Pattern
+
+When a cashier creates a new customer at the point of sale (the "Walk-in Customer" wizard), use this minimal POST. Only `displayName` is required — all other fields are optional.
+
+**Minimum viable request:**
+```http
+POST {{BC_BASE_URL}}/companies({companyId})/customers
+Authorization: Bearer {access_token}
+Content-Type: application/json
+
+{
+  "displayName": "John Smith"
+}
+```
+
+**Recommended request (with optional contact fields):**
+```http
+POST {{BC_BASE_URL}}/companies({companyId})/customers
+Authorization: Bearer {access_token}
+Content-Type: application/json
+
+{
+  "displayName": "John Smith",
+  "email": "john@example.com",
+  "phoneNumber": "+45 12 34 56 78",
+  "addressLine1": "Main Street 1",
+  "city": "Copenhagen",
+  "country": "DK",
+  "postalCode": "1000"
+}
+```
+
+**After a successful POST (201 Created), store these fields in the local `customers` table:**
+
+| BC response field | Local column   | Notes                              |
+|-------------------|----------------|------------------------------------|
+| `id`              | `id`           | BC GUID — used as `itemId` on export |
+| `number`          | `number`       | BC customer number, e.g. `"30000"` — used as `customerNumber` on invoice |
+| `displayName`     | `display_name` |                                    |
+| `email`           | `email`        |                                    |
+| `phoneNumber`     | `phone_number` |                                    |
+| `addressLine1`    | `address_line1`|                                    |
+| `city`            | `city`         |                                    |
+| `country`         | `country`      |                                    |
+| `postalCode`      | `postal_code`  |                                    |
+
+**Rules:**
+- Do **not** send `number` in the POST body — BC assigns it automatically
+- Do **not** send `balance`, `overdueAmount`, or `totalSalesExcludingTax` — read-only computed fields
+- `country` must be a 2-letter ISO code (`"DK"`, `"US"`, `"GB"`, etc.)
+- Auto-select the newly created customer for the active sale immediately after writing to the local table
+
+---
+
 ## ETag / If-Match
 
 When updating (PATCH) or deleting (DELETE) a customer, you **must** include the `If-Match` header:
