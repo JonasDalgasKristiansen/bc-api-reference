@@ -295,12 +295,46 @@ Content-Type: application/json
 ### Option 3 — Continue Anonymous
 - No customer is attached to the sale
 - `customer_id` and `customer_number` are stored as `null` on the sale record
-- On export: use the BC default walk-in customer number (configured in admin settings, e.g. `"10000"`) as the `customerNumber` on the Sales Invoice
+- On export: use a hardcoded fallback customer number as the `customerNumber` on the Sales Invoice (see **Anonymous Sale Export** below)
 
 ---
 
 ### Data stored on the sale
 `customer_id` (BC GUID) and `customer_number` (e.g. `"30000"`) must both be saved on the sale record. The export always resolves `customerNumber` from the local `customers` table using `customer_id` — never trusts what was stored at checkout time. See **Known Export Pitfalls** below.
+
+---
+
+### Anonymous Sale Export — explicit logic
+
+When exporting a sale where `customer_id` is `null` (anonymous / "Continue Anonymous"), the export **must not** send `null`, `undefined`, or an empty string as `customerNumber` — BC will reject the invoice.
+
+Use this exact resolution logic:
+
+```typescript
+// Resolve customerNumber for the Sales Invoice POST body
+let customerNumber: string;
+
+if (sale.customer_id) {
+  // Named customer — look up from local mirror (never trust sale.customer_number directly)
+  const customer = await db.queryOne(
+    'SELECT number FROM customers WHERE id = ?', [sale.customer_id]
+  );
+  customerNumber = customer?.number ?? ANONYMOUS_CUSTOMER_NUMBER;
+} else {
+  // Anonymous sale — use the configured fallback
+  customerNumber = ANONYMOUS_CUSTOMER_NUMBER;
+}
+
+// ANONYMOUS_CUSTOMER_NUMBER must be a real BC customer number, e.g. "10000"
+// Configure it in admin settings or as an environment variable
+```
+
+**The anonymous customer (`ANONYMOUS_CUSTOMER_NUMBER`) must be:**
+- A real, existing customer number in BC (e.g. `"10000"`)
+- Set up in BC with a valid Gen. Bus. Posting Group so invoices can be posted against it
+- Configurable in the POS admin dashboard — do not hardcode it in the edge function
+
+**The admin dashboard must show a warning if `ANONYMOUS_CUSTOMER_NUMBER` is not configured.** Exports of anonymous sales will fail without it.
 
 ---
 
@@ -384,7 +418,13 @@ BC occasionally returns HTML error pages instead of JSON (e.g. during outages or
 **7. Failed exports not retried**
 The export queue must pick up both `pending` and `failed` status transactions. If only `pending` is queried, failed exports are never retried.
 
-**8. Walk-in customer missing Gen. Bus. Posting Group — invoice rejected**
+**8. Sending `customerTemplateCode` or other non-existent fields when creating a customer**
+The BC REST API v2.0 customers endpoint does not have a `customerTemplateCode` field. Sending it in the POST body causes:
+> *"The property 'customerTemplateCode' does not exist on type 'Microsoft.NAV.customer'"*
+
+Only send these fields when creating a customer: `displayName`, `email`, `phoneNumber`, `addressLine1`, `addressLine2`, `city`, `state`, `country`, `postalCode`, `currencyCode`. Do not send `number`, `customerTemplateCode`, `generalBusinessPostingGroupCode`, `balance`, `overdueAmount`, or `totalSalesExcludingTax`.
+
+**9. Walk-in customer missing Gen. Bus. Posting Group — invoice rejected**
 When a customer is created via the walk-in wizard, BC creates the customer record but the `generalBusinessPostingGroupCode` field is **not settable via the REST API v2.0**. If BC has no default posting group configured for new customers, the customer will be created without one and any invoice posted against them will be rejected with:
 > *"Gen. Bus. Posting Group must have a value in Customer"*
 

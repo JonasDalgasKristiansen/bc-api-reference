@@ -4,9 +4,11 @@ Customers represent the people or organizations that purchase goods and services
 
 ---
 
-## ⚠️ Fields That Must NOT Be Used in `$select`
+## ⚠️ Fields That Must NOT Be Sent or Selected
 
-The following fields are **computed** and cause a `400 Bad Request` in many BC configurations when included in `$select`:
+### Never include in `$select` (causes 400)
+
+The following are computed fields that cause a `400 Bad Request` in many BC configurations when included in `$select`:
 
 | Field                    | Do NOT use in `$select` | Workaround                                   |
 |--------------------------|--------------------------|----------------------------------------------|
@@ -14,7 +16,20 @@ The following fields are **computed** and cause a `400 Bad Request` in many BC c
 | `overdueAmount`          | ❌                       | Omit from `$select`, or `$expand=customerFinancialDetails` |
 | `totalSalesExcludingTax` | ❌                       | Omit from `$select`, or `$expand=customerFinancialDetails` |
 
-These fields **are** returned automatically when you do a GET without `$select`. Only include them in `$select` if you know your BC environment supports it, which many do not.
+These fields **are** returned automatically when you do a GET without `$select`.
+
+### Never send in POST or PATCH body (fields that do not exist in the REST API v2.0)
+
+The following fields do **not exist** on the BC REST API v2.0 customers endpoint. Sending them causes a `400 Bad Request`:
+
+| Field                            | Why it's wrong                                                                 |
+|----------------------------------|--------------------------------------------------------------------------------|
+| `customerTemplateCode`           | Does not exist in REST API v2.0 — hallucinated field. Never send it.           |
+| `generalBusinessPostingGroupCode`| Not writable via REST API — must be configured as a BC default (see below)     |
+| `number`                         | Do not send on POST — BC assigns it automatically                              |
+| `balance`                        | Read-only computed field                                                       |
+| `overdueAmount`                  | Read-only computed field                                                       |
+| `totalSalesExcludingTax`         | Read-only computed field                                                       |
 
 **Safe customer import query:**
 ```
@@ -375,6 +390,9 @@ Content-Type: application/json
 | `postalCode`      | `postal_code`  |                                    |
 
 **Rules:**
+- `displayName` is the only required field — all others are optional
+- Do **not** send `customerTemplateCode` — this field does **not exist** in the REST API v2.0 and causes a 400 error
+- Do **not** send `generalBusinessPostingGroupCode` — not writable via the REST API
 - Do **not** send `number` in the POST body — BC assigns it automatically
 - Do **not** send `balance`, `overdueAmount`, or `totalSalesExcludingTax` — read-only computed fields
 - `country` must be a 2-letter ISO code (`"DK"`, `"US"`, `"GB"`, etc.)
