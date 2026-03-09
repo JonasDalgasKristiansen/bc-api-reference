@@ -384,6 +384,35 @@ BC occasionally returns HTML error pages instead of JSON (e.g. during outages or
 **7. Failed exports not retried**
 The export queue must pick up both `pending` and `failed` status transactions. If only `pending` is queried, failed exports are never retried.
 
+**8. Walk-in customer missing Gen. Bus. Posting Group — invoice rejected**
+When a customer is created via the walk-in wizard, BC creates the customer record but the `generalBusinessPostingGroupCode` field is **not settable via the REST API v2.0**. If BC has no default posting group configured for new customers, the customer will be created without one and any invoice posted against them will be rejected with:
+> *"Gen. Bus. Posting Group must have a value in Customer"*
+
+This is a **BC configuration issue, not a code bug.** The fix is:
+- Open BC → **Sales & Receivables Setup** → set a default **Gen. Bus. Posting Group** (e.g. `DOMESTIC`)
+- OR set up a **Customer Template** in BC with the posting group pre-filled
+
+When the export fails with this error, surface it clearly to the cashier with the message:
+> *"Invoice rejected: customer is missing a General Business Posting Group in Business Central. Ask your BC administrator to set a default posting group in Sales & Receivables Setup."*
+
+The admin dashboard should display a warning if any sale fails export with this error code.
+
+---
+
+## BC Setup Checklist
+
+Before the POS can create customers and post invoices reliably, a BC administrator must verify these settings in Business Central:
+
+| Setting | Where in BC | Why it matters |
+|---------|-------------|----------------|
+| **Gen. Bus. Posting Group** default | Sales & Receivables Setup | Required on every customer — API cannot set it. Without it, all invoices for API-created customers will be rejected |
+| **Customer Posting Group** default | Sales & Receivables Setup | Required for posting invoices to the correct receivables account |
+| **VAT Bus. Posting Group** default | Sales & Receivables Setup | Required for correct VAT calculation on invoices |
+| **Payment Terms** | Payment Terms list | Recommended — without it invoices have no due date |
+| **Item Type = Inventory** | Item card per item | Required for inventory to reduce when invoices are posted. `Service` and `Non-Inventory` items do not affect stock |
+
+The POS admin dashboard should display this checklist and ideally test-create a dummy customer on first setup to verify BC is correctly configured.
+
 ## BC API Reference
 
 This project uses the Business Central REST API v2.0 with OAuth2 client credentials.
