@@ -122,6 +122,7 @@ Common mistakes to avoid:
 - ❌ `$select=...,balance` on customers → ✅ omit `balance`, `overdueAmount`, and `totalSalesExcludingTax` from `$select` entirely — these computed fields cause a 400 error in some BC configurations when explicitly selected. They are returned automatically in the default response, or use `$expand=customerFinancialDetails` if you specifically need them.
 - ❌ `jobId` in POST body → ✅ `jobNumber` in POST body. `jobId` is read-only (auto-set by BC from `jobNumber`). Sending a non-GUID `jobId` causes BC to silently ignore the project assignment. Only use `jobNumber`.
 - ❌ `description` on items → ✅ `displayName`. BC items have **no** `description` field in the v2.0 API. The item name field is `displayName`. Do not use `description` in `$select`, POST bodies, or upserts — it does not exist and will cause a 400 error.
+- ❌ `customerTemplateCode` in customer POST body → ✅ do not send it at all. This field does **not exist** in the REST API v2.0. Sending it causes `400 "The property 'customerTemplateCode' does not exist on type 'Microsoft.NAV.customer'"`. Only send: `displayName`, `email`, `phoneNumber`, `addressLine1`, `addressLine2`, `city`, `state`, `country`, `postalCode`, `currencyCode`.
 
 ### ⚠️ POS System — Correct Import Queries
 
