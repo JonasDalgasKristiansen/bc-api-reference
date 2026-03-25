@@ -5,16 +5,16 @@ A full web-based Point of Sale system that mirrors Microsoft Business Central da
 ## Architecture
 
 ```
-┌─────────────────────┐      ┌──────────────────┐      ┌────────────────────┐
+┌─────────────────────┐      ┌───────────────────┐      ┌────────────────────┐
 │   React Frontend    │◄────►│  Express Backend  │◄────►│ Business Central   │
-│   (POS Terminal)    │      │  (SQLite DB)      │      │ (REST API v2.0)    │
+│   (POS Terminal)    │      │   (SUPABASE)      │      │ (REST API v2.0)    │
 │                     │      │                   │      │                    │
 │  - Product grid     │      │  - Local mirror   │      │  - Items           │
 │  - Cart / checkout  │      │  - Offline sales  │      │  - Customers       │
 │  - Customer search  │      │  - Sync engine    │      │  - Sales Orders    │
 │  - Receipt view     │      │  - Cron scheduler │      │  - Tax / Payments  │
-│  - Admin dashboard  │      │  - Export queue    │      │  - Inventory       │
-└─────────────────────┘      └──────────────────┘      └────────────────────┘
+│  - Admin dashboard  │      │  - Export queue   │      │  - Inventory       │
+└─────────────────────┘      └───────────────────┘      └────────────────────┘
 ```
 
 ## Key Features
