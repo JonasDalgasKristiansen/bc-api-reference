@@ -1,137 +1,191 @@
-# Dokumentation — BC API Reference Repo
-
-> Denne fil forklarer hvad dette repository indeholder, hvorfor det eksisterer, og hvordan det bruges med AI vibe-coding værktøjer som **Lovable**, **Bolt**, **Cursor** og **GitHub Copilot**.
+# BC API Reference — Why This Repo Exists
 
 ---
 
-## Problemet
+## What Is This?
 
-AI-kodningsværktøjer som Lovable kan bygge fulde webapplikationer på minutter — men de kender ikke Business Central's API. Uden korrekt dokumentation vil AI'en:
+A complete, structured API reference for **Microsoft Dynamics 365 Business Central** — written specifically so AI coding tools can read it and generate working code.
 
-- Bygge demo-apps med falsk/hardcoded data
-- Bruge forkerte feltnavne (f.eks. `description` i stedet for `displayName` på Items)
-- Mangle autentificering helt
-- Sende forkerte API-kald der returnerer 400/404 fejl
-- Gætte på endpoint-strukturer i stedet for at bruge de rigtige
+It covers **80+ endpoints** across 15 categories: customers, items, sales, purchase, finance, employees, projects, time tracking, and more. Every endpoint includes field definitions with data types, full HTTP examples, JSON payloads, OData query patterns, and known errors.
 
-**Løsningen:** Vi giver AI'en et komplet API-referencebibliotek som den kan læse som kontekst — så den genererer korrekt, fungerende kode fra start.
+**It is not a library. It is not a framework. It is documentation — structured for machines.**
 
 ---
 
-## Hvad Er Dette Repo?
+## The Problem
 
-Et struktureret dokumentationsbibliotek der dækker **hele** Microsoft Dynamics 365 Business Central REST API v2.0. Det er skrevet så AI-værktøjer kan læse det og generere kode der virker mod den rigtige API — uden at en udvikler behøver at skrive noget manuelt.
+Lovable can build full web applications in minutes. But it has **no idea** how the Business Central API works.
 
-### Nøgletal
-
-| Hvad | Antal |
-|------|-------|
-| API endpoints dokumenteret | 80+ |
-| Ressource-kategorier | 15 (Kunder, Varer, Salg, Køb, Finans, m.fl.) |
-| Understøttede operationer | GET, POST, PATCH, DELETE + bound actions |
-| Eksempel-forespørgsler per endpoint | 3–10 (inkl. OData $filter, $select, $expand) |
-| Fejlhåndtering dokumenteret | Ja — per endpoint |
+If you just type *"Build me an offline POS system connected to Business Central"* — this is what happens:
 
 ---
 
-## Repo-Struktur
+### What Goes Wrong Without This Repo
+
+**1. It builds a fake app**
+
+Lovable has no BC knowledge, so it generates a demo with hardcoded products, fake customers, and placeholder API calls that don't connect to anything. It looks great — but it's not real.
+
+**2. It guesses field names — and guesses wrong**
+
+The item name field in BC is `displayName`. Lovable will use `description` — because that's what most APIs call it. The result: **400 Bad Request** on every item import.
+
+```
+// What Lovable writes:
+$select=id,number,description,unitPrice
+
+// What BC actually needs:
+$select=id,number,displayName,unitPrice
+```
+
+There is no `description` field on BC items. You find out after 30 minutes of debugging.
+
+**3. It includes fields that break the API**
+
+Lovable will try to fetch `balance`, `overdueAmount`, and `totalSalesExcludingTax` on customers — because those sound useful. In most BC environments, these computed fields cause a **400 error** when included in `$select`.
+
+```
+// What Lovable writes:
+$select=id,number,displayName,email,balance,overdueAmount
+
+// What actually works:
+$select=id,number,displayName,email,phoneNumber,addressLine1,city,postalCode
+```
+
+You won't find this in Microsoft's documentation. We found it by testing.
+
+**4. It gets authentication wrong**
+
+BC uses OAuth2 Client Credentials — not API keys, not basic auth. Lovable doesn't know this. It'll either skip auth entirely, use the wrong flow, or hardcode credentials in the frontend.
+
+**5. It puts the company name in the URL path — which breaks**
+
+Company names like `CRONUS Danmark A/S` contain spaces and `/`. Lovable will embed them in the URL. HTTP proxies decode `%2F` back to `/`, splitting the path. The call fails silently or returns a confusing 404.
+
+The correct pattern is to **resolve the company GUID first** and use the GUID in all subsequent calls.
+
+**6. It sends local database IDs to BC**
+
+When exporting sales, Lovable will use the local UUID for customer and item references. BC doesn't know those IDs — it needs its own GUIDs. Every export call fails.
+
+---
+
+### Why You Can't Just Write a Better Prompt
+
+You might think: *"Maybe I just need to be more specific in my prompt."*
+
+But you'd need to tell Lovable:
+
+- The exact OAuth2 token endpoint and scope
+- Which fields exist on every entity and their exact names
+- Which fields look valid but cause 400 errors
+- That `displayName` is the item name, not `description` or `name`
+- How to resolve the company GUID before making any other call
+- How to use `$filter`, `$select`, `$expand` in OData v4 format
+- That posted invoices require a bound action (`Microsoft.NAV.post`)
+- That `externalDocumentNumber` has a 35-character limit
+- That you need to resolve `itemId` (BC GUID) from a local mirror, not send your database UUID
+
+That's not a prompt — that's writing an entire API reference. Which is exactly what we did.
+
+---
+
+## What's In This Repo
 
 ```
 bc-api-reference/
 │
-├── README.md                    # Hurtig-guide til slutbrugere (opsætning + prompts)
-├── README_DOKUK.md              # Denne fil — fuld dokumentation af repoet
-├── AI_INSTRUCTIONS.md           # Regler som AI-værktøjet SKAL følge
-├── HOW_TO_USE_WITH_AI.md        # Detaljeret guide til prompting med forskellige AI-værktøjer
-├── DEVELOPER_GUIDE.md           # Teknisk reference for udviklere (auth, OData, pagination)
-├── .env.example                 # Liste over påkrævede miljøvariabler
+├── README.md                    # Quick-start for end users (setup + example prompts)
+├── README_DOKUK.md              # This file — explains the repo and why it matters
+├── AI_INSTRUCTIONS.md           # Rules the AI MUST follow (auth, field names, patterns)
+├── HOW_TO_USE_WITH_AI.md        # Detailed prompting guide for Lovable, Bolt, Cursor, Copilot
+├── DEVELOPER_GUIDE.md           # Technical reference for developers (OAuth2, OData, pagination)
 │
-└── resources/                   # Selve API-dokumentationen
-    ├── _overview.md             # Master-oversigt over ALLE endpoints + OData cheat sheet
+└── resources/                   # The actual API documentation
+    ├── _overview.md             # Master table of ALL 80+ endpoints + OData cheat sheet
     │
-    ├── customers/               # Kunder, betalingsjournaler
-    ├── vendors/                 # Leverandører, betalingsjournaler
-    ├── contacts/                # Kontaktpersoner, sælgere/indkøbere
-    ├── items/                   # Varer, varianter, kategorier, lagerbeholdning, lokationer
-    ├── sales/                   # Tilbud, ordrer, fakturaer, kreditnotaer, forsendelser
-    ├── purchase/                # Indkøbsordrer, fakturaer, kreditnotaer, modtagelser
-    ├── finance/                 # Kontoplan, bankkonti, journaler, finansposter, rapporter
-    ├── employees/               # Medarbejdere
-    ├── projects/                # Projekter (sager), sagsopgaver
-    ├── time-tracking/           # Tidsregistrering
-    ├── fixed-assets/            # Anlægsaktiver
-    ├── documents/               # Vedhæftninger, PDF-dokumenter
-    ├── dimensions/              # Dimensioner, dimensionssætlinjer
-    ├── setup/                   # Valutaer, betalingsbetingelser, enheder, lande, moms
-    ├── company/                 # Virksomhedsoplysninger
-    ├── automation/              # Automatiserings-API (brugere, extensions, miljøer)
-    ├── webhooks/                # Webhook-abonnementer
-    └── pos-system/              # Komplet POS-system guide (offline-first, synk, eksport)
+    ├── customers/               # Customers, payment journals
+    ├── vendors/                 # Vendors, payment journals
+    ├── contacts/                # Contacts, salespersons/purchasers
+    ├── items/                   # Items, variants, categories, inventory, locations
+    ├── sales/                   # Quotes, orders, invoices, credit memos, shipments
+    ├── purchase/                # Purchase orders, invoices, credit memos, receipts
+    ├── finance/                 # Chart of accounts, bank accounts, journals, G/L entries
+    ├── employees/               # Employees
+    ├── projects/                # Projects (jobs), job tasks
+    ├── time-tracking/           # Time registration entries
+    ├── fixed-assets/            # Fixed assets
+    ├── documents/               # Attachments, PDF documents
+    ├── dimensions/              # Dimensions, dimension set lines
+    ├── setup/                   # Currencies, payment terms, units, countries, tax
+    ├── company/                 # Company information
+    ├── automation/              # Automation API (users, extensions, environments)
+    ├── webhooks/                # Webhook subscriptions
+    └── pos-system/              # Complete POS system guide (offline-first, sync, export)
 ```
 
----
-
-## Hvad Hver Fil Gør
-
-| Fil | Målgruppe | Formål |
-|-----|-----------|--------|
-| **AI_INSTRUCTIONS.md** | AI-værktøjet | 8 regler AI'en skal følge: brug rigtige API-kald, bed om credentials, brug korrekt auth-flow, brug præcise feltnavne, håndtér pagination, osv. |
-| **HOW_TO_USE_WITH_AI.md** | Brugeren | Step-by-step guide til at forbinde repoet med Lovable, Bolt, Cursor eller Copilot — inkl. prompt-eksempler |
-| **DEVELOPER_GUIDE.md** | Udviklere | Fuld teknisk reference: OAuth2 flow, token-caching, OData queries, pagination, fejlhåndtering, rate limits |
-| **resources/_overview.md** | AI + Udviklere | Master-tabel over alle 80+ endpoints med HTTP-metoder, URL-paths, og bound actions |
-| **resources/\*/\*.md** | AI-værktøjet | Detaljeret dokumentation per endpoint — feltdefinitioner med datatyper, fulde HTTP-eksempler, JSON payloads, OData mønstre, kendte fejl |
-| **resources/pos-system/** | AI-værktøjet | Komplet arkitekturguide til et offline-first POS system med BC-synkronisering |
+Each resource file contains everything the AI needs for that endpoint — field names with types, full HTTP request/response examples, OData patterns, and common errors.
 
 ---
 
-## Hvorfor Give Det Til Lovable?
+## How It Works With Lovable
 
-### Uden dette repo
+1. Connect this GitHub repo to Lovable as a knowledge source
+2. Add your 5 BC credentials as Lovable Secrets
+3. Write a prompt describing what you want
+4. Point Lovable at `AI_INSTRUCTIONS.md` and the relevant resource files
 
-AI'en har ingen viden om Business Central's API. Resultatet:
-
-1. Den bygger en app med **falsk data** og placeholder-endpoints
-2. Eller den gætter på API-strukturen og laver **forkerte kald** (`description` i stedet for `displayName`, `balance` i `$select` som giver 400-fejl)
-3. Den mangler **autentificering** eller bruger forkert auth-flow
-4. Du bruger timer på at debugge og rette
-
-### Med dette repo
-
-AI'en læser dokumentationen og genererer **korrekt, fungerende kode fra første forsøg**:
-
-1. Korrekt OAuth2 Client Credentials flow med token-caching
-2. Rigtige feltnavne og datatyper på alle API-kald
-3. Korrekt OData $filter, $select og $expand syntax
-4. Korrekt håndtering af company GUID-opslag
-5. Fejlhåndtering der matcher de faktiske fejlkoder fra BC
-6. Credentials læst fra miljøvariabler — aldrig hardcoded
-
-### Tidsbesparelse
-
-| Opgave | Uden repo | Med repo |
-|--------|-----------|----------|
-| Simpel kunde-oversigt | Timer (debugging af forkerte feltnavne) | Minutter |
-| Salgs-dashboard med fakturaer | Dage | Under en time |
-| Komplet POS-system med offline-synk | Uger af udvikling | Bygget i én session |
+Lovable reads the documentation, follows the rules, and generates code that works against the real BC API — on the first try.
 
 ---
 
-## Eksempel: POS-System Bygget Med Lovable
+## Demo: A Full POS System — Built With One Prompt
 
-For at demonstrere styrken ved dette repo har vi bygget et **komplet POS-system** med Business Central synkronisering — udelukkende via en prompt til Lovable.
+To show what this repo makes possible, we built a **complete offline-first Point of Sale system** with Business Central sync. No manual coding. Just a prompt to Lovable with this repo connected.
 
-### Hvad POS-systemet kan
+---
 
-- **Offline-first**: Hele kassen virker uden forbindelse til Business Central
-- **Lokal dataspejling**: Alle varer, kunder, priser og moms importeres fra BC og gemmes lokalt
-- **Touch-venligt POS UI**: Produktgitter, søgning, stregkodescanning, indkøbskurv, betaling
-- **Kundevalg ved checkout**: Søg i lokale kunder, opret walk-in kunde direkte i BC, eller fortsæt anonymt
-- **Kvittering**: On-screen kvittering efter hvert salg med print-funktion
-- **Eksport til BC**: Ét klik eksporterer alle usynkede salg som salgsfakturaer i Business Central
-- **Idempotent synk**: `externalDocumentNumber` forhindrer duplikerede poster ved geneksport
-- **Admin dashboard**: Forbindelsesstatus, synkroniseringslog, tvunget synk
+### Architecture (Lovable + Supabase)
 
-### Prompten vi brugte
+```
+┌─────────────────────┐      ┌───────────────────────────┐      ┌────────────────────┐
+│   React Frontend    │◄────►│   Supabase                │◄────►│ Business Central   │
+│   (Lovable-hosted)  │      │                           │      │ (REST API v2.0)    │
+│                     │      │   PostgreSQL database:    │      │                    │
+│  - Product grid     │      │    - items mirror         │      │  - Items           │
+│  - Cart / checkout  │      │    - customers mirror     │      │  - Customers       │
+│  - Customer search  │      │    - sales + sale_lines   │      │  - Sales Invoices  │
+│  - Receipt view     │      │    - sync_logs            │      │  - Tax Groups      │
+│  - Admin dashboard  │      │                           │      │  - Inventory       │
+│                     │      │   Edge Functions (Deno):  │      │                    │
+│                     │      │    - bc-import (sync)     │      │                    │
+│                     │      │    - bc-export (invoices)  │      │                    │
+│                     │      │    - bc-auth (OAuth2)     │      │                    │
+└─────────────────────┘      └───────────────────────────┘      └────────────────────┘
+```
+
+**Frontend** — React app hosted by Lovable. Touch-friendly POS UI with product grid, barcode scanning, cart, and checkout wizard.
+
+**Backend** — Supabase PostgreSQL stores a local mirror of all BC data (items, customers, tax) plus all POS sales. Supabase Edge Functions handle OAuth2 authentication and all BC API calls server-side — credentials never touch the browser.
+
+**Business Central** — The source of truth. Products, customers, and prices are imported from BC into the local database. Sales are exported back as posted invoices.
+
+---
+
+### What the POS System Does
+
+- **Works fully offline** — the cash register never calls BC during checkout
+- **Mirrors all BC data locally** — items, customers, prices, tax groups, inventory
+- **Product search + barcode scanning** — fast lookup from local database
+- **Two-step checkout wizard** — Step 1: select customer (search local DB, create walk-in in BC, or continue anonymous). Step 2: payment
+- **On-screen receipt** — shown after every sale, with a print button
+- **Export to BC** — one click exports all unsynced sales as Sales Invoices, posts them, and emails the customer
+- **Idempotent sync** — uses `externalDocumentNumber` (sale number like `POS-0001`) to prevent duplicates if you click export twice
+- **Admin dashboard** — BC connection status, last sync time, error logs, force sync button
+
+---
+
+### The Prompt We Used
 
 ```
 Full POS System with Business Central Sync
@@ -139,105 +193,70 @@ Full POS System with Business Central Sync
 Build a full web-based POS system that syncs with Microsoft Business Central.
 
 The app must:
-- Import all products, prices, customers, taxes, and inventory from Business Central
+- Import all products, prices, customers, taxes, and inventory
+  from Business Central
 - Store all imported data locally in the backend
 - Work fully offline — no live BC calls during checkout
 - Save all sales transactions in the backend database
-- Include an "Export to Business Central" button to sync unsynced sales once BC is online again
+- Include an "Export to Business Central" button to sync unsynced
+  sales once BC is online again
 
 Requirements:
-- Modern POS UI (touch-friendly, barcode scan, product search, cart, payments, receipts)
+- Modern POS UI (touch-friendly, barcode scan, product search,
+  cart, payments, receipts)
 - Backend with local database (store BC mirror + offline sales)
 - Scheduled sync from BC → local database
 - Track sync status per transaction
-- Export unsynced sales as Sales Invoices — post and email automatically.
-  See resources/pos-system/pos-system.md → Export Flow
-- Prevent duplicate exports (idempotent sync logic using externalDocumentNumber)
-- Decrement local inventory immediately at checkout. Re-sync inventory from BC
-  after each export. See resources/pos-system/pos-system.md → Inventory Sync
-- When the cashier presses Checkout, open a two-step wizard.
-  Step 1 — Customer — presents three options:
-    (1) search and select an existing customer from the local DB (no BC call),
-    (2) Walk-in Customer — opens a quick-create wizard that POSTs to BC,
-    (3) Continue Anonymous — no customer attached.
-  Step 2 is Payment.
-  See resources/pos-system/pos-system.md → Checkout: Customer Selection & Creation
-- Cash payment button at checkout with on-screen receipt.
-  See resources/pos-system/pos-system.md → Checkout: Cash Payment & Receipt
-- Admin dashboard with: BC connection status, last sync timestamp, error logs,
-  force sync button
+- Export unsynced sales as Sales Invoices — post and email
+  automatically
+- Prevent duplicate exports (idempotent sync logic using
+  externalDocumentNumber)
+- Cash payment button at checkout with on-screen receipt
+- Admin dashboard with: BC connection status, last sync timestamp,
+  error logs, force sync button
 
 Important:
 - Read AI_INSTRUCTIONS.md first — follow all rules
-- Read resources/pos-system/pos-system.md for exact BC queries and architecture
-- Credentials stored as Lovable Secrets (BC_TENANT_ID, BC_CLIENT_ID,
-  BC_CLIENT_SECRET, BC_ENVIRONMENT, BC_COMPANY_NAME)
+- Read resources/pos-system/pos-system.md for exact BC queries
+  and architecture
+- Credentials stored as Lovable Secrets
 
-API Reference: github.com/JonasDalgasKristiansen/bc-api-reference
+API Reference:
+github.com/JonasDalgasKristiansen/bc-api-reference
 ```
-
-### Arkitektur
-
-```
-┌─────────────────────┐      ┌──────────────────┐      ┌────────────────────┐
-│   React Frontend    │◄────►│  Express Backend  │◄────►│ Business Central   │
-│   (POS Terminal)    │      │  (SQLite DB)      │      │ (REST API v2.0)    │
-│                     │      │                   │      │                    │
-│  - Produktgitter    │      │  - Lokalt spejl   │      │  - Varer           │
-│  - Kurv / checkout  │      │  - Offline salg   │      │  - Kunder          │
-│  - Kundesøgning     │      │  - Synk-motor     │      │  - Salgsfakturaer  │
-│  - Kvitteringsview  │      │  - Cron scheduler │      │  - Moms / Betaling │
-│  - Admin dashboard  │      │  - Eksport-kø     │      │  - Lagerbeholdning │
-└─────────────────────┘      └──────────────────┘      └────────────────────┘
-```
-
-### Hvorfor det virker
-
-AI'en kunne bygge alt dette fordi repoet indeholder:
-
-1. **Præcise feltnavne** — AI'en bruger `displayName` på items, ikke `description` (som ville give en 400-fejl)
-2. **Komplette import-queries** — Eksakte `$select`-parametre der virker, inkl. kendte fælder der IKKE må bruges (`balance`, `overdueAmount`)
-3. **Eksport-flow dokumentation** — Trin-for-trin guide til at oprette salgsfakturaer, poste dem og sende email
-4. **Inventory-synk logik** — Hvornår og hvordan lagerbeholdning opdateres lokalt vs. fra BC
-5. **Checkout-flow specifikation** — Kundevalg, walk-in oprettelse, anonymt salg, betalingsflow
-6. **Idempotent synk-mønster** — Brug af `externalDocumentNumber` til at forhindre duplikater
 
 ---
 
-## Dækkede API-Områder
+### Why It Actually Works
 
-| Kategori | Endpoints | Hvad du kan bygge |
-|----------|-----------|-------------------|
-| **Kunder** | customers, customerFinancialDetails, customerPaymentJournals | CRM, kundeoversigter, betalingsregistrering |
-| **Leverandører** | vendors, vendorPaymentJournals | Leverandørstyring, indkøbsflow |
-| **Varer** | items, itemVariants, itemCategories, itemInventory, locations | Produktkataloger, lagerstyring, POS |
-| **Salg** | salesQuotes, salesOrders, salesInvoices, salesCreditMemos, salesShipments | Salgsdashboards, ordrestyring, fakturering |
-| **Køb** | purchaseOrders, purchaseInvoices, purchaseCreditMemos, purchaseReceipts | Indkøbsstyring, modtagelser |
-| **Finans** | accounts, journals, generalLedgerEntries, bankAccounts, financialReports | Regnskabsoversigter, bogføring, rapportering |
-| **Medarbejdere** | employees | HR-oversigter, medarbejderregistrering |
-| **Projekter** | projects, jobTasks | Projektstyring, sagsregistrering |
-| **Tidsregistrering** | timeRegistrationEntries | Tidsregistreringsapps |
-| **Anlægsaktiver** | fixedAssets | Anlægskartotek |
-| **Dokumenter** | attachments, pdfDocument | Dokumenthåndtering, PDF-download |
-| **Setup** | currencies, paymentTerms, paymentMethods, unitsOfMeasure, taxAreas, m.fl. | Opsætningsdata, stamdata |
-| **Webhooks** | subscriptions | Realtids-notifikationer fra BC |
-| **Automation** | users, extensions, environments | Administration, deployments |
+The AI built a working POS system because the repo told it exactly:
 
----
+**1. The correct field names**
+`displayName` on items, not `description`. Without this, every item import returns a 400 error.
 
-## Hvem Er Repoet Til?
+**2. Which fields to NOT use**
+`balance`, `overdueAmount`, `totalSalesExcludingTax` on customers crash most BC environments. The repo says: don't include them.
 
-| Rolle | Hvad de bruger |
-|-------|---------------|
-| **Forretningsbrugere** | README.md → opsætning + prompt-eksempler. Ingen kode nødvendig. |
-| **AI-værktøjer** | AI_INSTRUCTIONS.md + resources/ → genererer korrekt kode automatisk |
-| **Udviklere** | DEVELOPER_GUIDE.md → teknisk reference hvis man bygger manuelt |
-| **Præsentationer** | README_DOKUK.md (denne fil) → forklarer repoet og dets værdi |
+**3. The exact import queries**
+Pre-built `$select` parameters that are tested and verified — so the AI doesn't have to guess.
+
+**4. How to export sales to BC**
+Step-by-step: create a draft Sales Invoice → add invoice lines with `itemId` (BC GUID, not local UUID) → POST the bound action `Microsoft.NAV.post` → call `Microsoft.NAV.send` to email.
+
+**5. How to handle company lookup**
+Resolve the company GUID first via `GET /companies?$filter=name eq '...'`, then use the GUID everywhere. Never embed the company name in URL paths.
+
+**6. How to prevent duplicate exports**
+Use `externalDocumentNumber` set to the sale number (`POS-0001`). BC enforces uniqueness — if you export twice, the second call is rejected instead of creating a duplicate invoice.
 
 ---
 
-## Konklusion
+## The Point
 
-Dette repo er en **bro mellem Business Central og AI-kodningsværktøjer**. I stedet for at en udvikler manuelt skal lære BC's API, skrive autentificering, og debugge feltnavne — giver vi AI'en al den viden den behøver, og lader den bygge løsningen.
+Lovable is powerful — but it doesn't know Business Central.
 
-Resultatet: Funktionelle Business Central-integrationer bygget på minutter i stedet for uger.
+Without this repo, it guesses. It gets field names wrong, authentication wrong, and URL patterns wrong. You spend hours debugging things that look right but aren't.
+
+With this repo, it reads verified documentation and generates correct code from the start.
+
+**This repo is the bridge between Business Central and AI coding tools.**
