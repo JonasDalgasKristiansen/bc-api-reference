@@ -214,7 +214,7 @@ To show what this repo makes possible, we built a **complete offline-first Point
 │  - Admin dashboard  │      │                           │      │  - Inventory       │
 │                     │      │   Edge Functions (Deno):  │      │                    │
 │                     │      │    - bc-import (sync)     │      │                    │
-│                     │      │    - bc-export (invoices)  │      │                    │
+│                     │      │    - bc-export (invoices) │      │                    │
 │                     │      │    - bc-auth (OAuth2)     │      │                    │
 └─────────────────────┘      └───────────────────────────┘      └────────────────────┘
 ```
