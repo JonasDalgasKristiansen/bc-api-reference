@@ -90,6 +90,19 @@ That's not a prompt — that's writing an entire API reference. Which is exactly
 
 ---
 
+### What the POS System Does
+
+- **Works fully offline** — the cash register never calls BC during checkout
+- **Mirrors all BC data locally** — items, customers, prices, tax groups, inventory
+- **Product search + barcode scanning** — fast lookup from local database
+- **Two-step checkout wizard** — Step 1: select customer (search local DB, create walk-in in BC, or continue anonymous). Step 2: payment
+- **On-screen receipt** — shown after every sale, with a print button
+- **Export to BC** — one click exports all unsynced sales as Sales Invoices, posts them, and emails the customer
+- **Idempotent sync** — uses `externalDocumentNumber` (sale number like `POS-0001`) to prevent duplicates if you click export twice
+- **Admin dashboard** — BC connection status, last sync time, error logs, force sync button
+
+---
+
 ### The Prompt We Used
 
 ```
@@ -211,19 +224,6 @@ To show what this repo makes possible, we built a **complete offline-first Point
 **Backend** — Supabase PostgreSQL stores a local mirror of all BC data (items, customers, tax) plus all POS sales. Supabase Edge Functions handle OAuth2 authentication and all BC API calls server-side — credentials never touch the browser.
 
 **Business Central** — The source of truth. Products, customers, and prices are imported from BC into the local database. Sales are exported back as posted invoices.
-
----
-
-### What the POS System Does
-
-- **Works fully offline** — the cash register never calls BC during checkout
-- **Mirrors all BC data locally** — items, customers, prices, tax groups, inventory
-- **Product search + barcode scanning** — fast lookup from local database
-- **Two-step checkout wizard** — Step 1: select customer (search local DB, create walk-in in BC, or continue anonymous). Step 2: payment
-- **On-screen receipt** — shown after every sale, with a print button
-- **Export to BC** — one click exports all unsynced sales as Sales Invoices, posts them, and emails the customer
-- **Idempotent sync** — uses `externalDocumentNumber` (sale number like `POS-0001`) to prevent duplicates if you click export twice
-- **Admin dashboard** — BC connection status, last sync time, error logs, force sync button
 
 ---
 
