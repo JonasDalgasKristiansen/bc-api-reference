@@ -90,6 +90,48 @@ That's not a prompt — that's writing an entire API reference. Which is exactly
 
 ---
 
+### The Prompt We Used
+
+```
+Full POS System with Business Central Sync
+
+Build a full web-based POS system that syncs with Microsoft Business Central.
+
+The app must:
+- Import all products, prices, customers, taxes, and inventory
+  from Business Central
+- Store all imported data locally in the backend
+- Work fully offline — no live BC calls during checkout
+- Save all sales transactions in the backend database
+- Include an "Export to Business Central" button to sync unsynced
+  sales once BC is online again
+
+Requirements:
+- Modern POS UI (touch-friendly, barcode scan, product search,
+  cart, payments, receipts)
+- Backend with local database (store BC mirror + offline sales)
+- Scheduled sync from BC → local database
+- Track sync status per transaction
+- Export unsynced sales as Sales Invoices — post and email
+  automatically
+- Prevent duplicate exports (idempotent sync logic using
+  externalDocumentNumber)
+- Cash payment button at checkout with on-screen receipt
+- Admin dashboard with: BC connection status, last sync timestamp,
+  error logs, force sync button
+
+Important:
+- Read AI_INSTRUCTIONS.md first — follow all rules
+- Read resources/pos-system/pos-system.md for exact BC queries
+  and architecture
+- Credentials stored as Lovable Secrets
+
+API Reference:
+github.com/JonasDalgasKristiansen/bc-api-reference
+```
+
+---
+
 ## What's In This Repo
 
 ```
@@ -182,48 +224,6 @@ To show what this repo makes possible, we built a **complete offline-first Point
 - **Export to BC** — one click exports all unsynced sales as Sales Invoices, posts them, and emails the customer
 - **Idempotent sync** — uses `externalDocumentNumber` (sale number like `POS-0001`) to prevent duplicates if you click export twice
 - **Admin dashboard** — BC connection status, last sync time, error logs, force sync button
-
----
-
-### The Prompt We Used
-
-```
-Full POS System with Business Central Sync
-
-Build a full web-based POS system that syncs with Microsoft Business Central.
-
-The app must:
-- Import all products, prices, customers, taxes, and inventory
-  from Business Central
-- Store all imported data locally in the backend
-- Work fully offline — no live BC calls during checkout
-- Save all sales transactions in the backend database
-- Include an "Export to Business Central" button to sync unsynced
-  sales once BC is online again
-
-Requirements:
-- Modern POS UI (touch-friendly, barcode scan, product search,
-  cart, payments, receipts)
-- Backend with local database (store BC mirror + offline sales)
-- Scheduled sync from BC → local database
-- Track sync status per transaction
-- Export unsynced sales as Sales Invoices — post and email
-  automatically
-- Prevent duplicate exports (idempotent sync logic using
-  externalDocumentNumber)
-- Cash payment button at checkout with on-screen receipt
-- Admin dashboard with: BC connection status, last sync timestamp,
-  error logs, force sync button
-
-Important:
-- Read AI_INSTRUCTIONS.md first — follow all rules
-- Read resources/pos-system/pos-system.md for exact BC queries
-  and architecture
-- Credentials stored as Lovable Secrets
-
-API Reference:
-github.com/JonasDalgasKristiansen/bc-api-reference
-```
 
 ---
 
