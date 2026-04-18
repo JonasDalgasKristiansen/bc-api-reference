@@ -194,12 +194,6 @@ Lovable reads the documentation, follows the rules, and generates code that work
 
 ---
 
-## Demo: A Full POS System — Built With One Prompt
-
-To show what this repo makes possible, we built a **complete offline-first Point of Sale system** with Business Central sync. No manual coding. Just a prompt to Lovable with this repo connected.
-
----
-
 ### Architecture (Lovable + Supabase)
 
 ```
@@ -260,3 +254,9 @@ Without this repo, it guesses. It gets field names wrong, authentication wrong, 
 With this repo, it reads verified documentation and generates correct code from the start.
 
 **This repo is the bridge between Business Central and AI coding tools.**
+
+---
+
+## Demo: A Full POS System — Built With One Prompt
+
+To show what this repo makes possible, we built a **complete offline-first Point of Sale system** with Business Central sync. No manual coding. Just a prompt to Lovable with this repo connected.
