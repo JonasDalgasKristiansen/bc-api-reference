@@ -4,7 +4,7 @@
 
 - **Works fully offline** — the cash register never calls BC during checkout
 - **Mirrors all BC data locally** — items, customers, prices, tax groups, inventory
-- **Product search + barcode scanning** — fast lookup from local database
+- **Product search** — fast lookup from local database
 - **Two-step checkout wizard** — Step 1: select customer (search local DB, create walk-in in BC, or continue anonymous). Step 2: payment
 - **On-screen receipt** — shown after every sale, with a print button
 - **Export to BC** — one click exports all unsynced sales as Sales Invoices, posts them, and emails the customer
