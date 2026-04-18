@@ -1,5 +1,58 @@
 # BC API Reference — Why This Repo Exists
 
+### What the POS System Does
+
+- **Works fully offline** — the cash register never calls BC during checkout
+- **Mirrors all BC data locally** — items, customers, prices, tax groups, inventory
+- **Product search + barcode scanning** — fast lookup from local database
+- **Two-step checkout wizard** — Step 1: select customer (search local DB, create walk-in in BC, or continue anonymous). Step 2: payment
+- **On-screen receipt** — shown after every sale, with a print button
+- **Export to BC** — one click exports all unsynced sales as Sales Invoices, posts them, and emails the customer
+- **Idempotent sync** — uses `externalDocumentNumber` (sale number like `POS-0001`) to prevent duplicates if you click export twice
+- **Admin dashboard** — BC connection status, last sync time, error logs, force sync button
+
+---
+
+### The Prompt We Used
+
+```
+Full POS System with Business Central Sync
+
+Build a full web-based POS system that syncs with Microsoft Business Central.
+
+The app must:
+- Import all products, prices, customers, taxes, and inventory
+  from Business Central
+- Store all imported data locally in the backend
+- Work fully offline — no live BC calls during checkout
+- Save all sales transactions in the backend database
+- Include an "Export to Business Central" button to sync unsynced
+  sales once BC is online again
+
+Requirements:
+- Modern POS UI (touch-friendly, barcode scan, product search,
+  cart, payments, receipts)
+- Backend with local database (store BC mirror + offline sales)
+- Scheduled sync from BC → local database
+- Track sync status per transaction
+- Export unsynced sales as Sales Invoices — post and email
+  automatically
+- Prevent duplicate exports (idempotent sync logic using
+  externalDocumentNumber)
+- Cash payment button at checkout with on-screen receipt
+- Admin dashboard with: BC connection status, last sync timestamp,
+  error logs, force sync button
+
+Important:
+- Read AI_INSTRUCTIONS.md first — follow all rules
+- Read resources/pos-system/pos-system.md for exact BC queries
+  and architecture
+- Credentials stored as Lovable Secrets
+
+API Reference:
+github.com/JonasDalgasKristiansen/bc-api-reference
+```
+
 ---
 
 ## What Is This?
@@ -87,61 +140,6 @@ But you'd need to tell Lovable:
 - That you need to resolve `itemId` (BC GUID) from a local mirror, not send your database UUID
 
 That's not a prompt — that's writing an entire API reference. Which is exactly what we did.
-
----
-
-### What the POS System Does
-
-- **Works fully offline** — the cash register never calls BC during checkout
-- **Mirrors all BC data locally** — items, customers, prices, tax groups, inventory
-- **Product search + barcode scanning** — fast lookup from local database
-- **Two-step checkout wizard** — Step 1: select customer (search local DB, create walk-in in BC, or continue anonymous). Step 2: payment
-- **On-screen receipt** — shown after every sale, with a print button
-- **Export to BC** — one click exports all unsynced sales as Sales Invoices, posts them, and emails the customer
-- **Idempotent sync** — uses `externalDocumentNumber` (sale number like `POS-0001`) to prevent duplicates if you click export twice
-- **Admin dashboard** — BC connection status, last sync time, error logs, force sync button
-
----
-
-### The Prompt We Used
-
-```
-Full POS System with Business Central Sync
-
-Build a full web-based POS system that syncs with Microsoft Business Central.
-
-The app must:
-- Import all products, prices, customers, taxes, and inventory
-  from Business Central
-- Store all imported data locally in the backend
-- Work fully offline — no live BC calls during checkout
-- Save all sales transactions in the backend database
-- Include an "Export to Business Central" button to sync unsynced
-  sales once BC is online again
-
-Requirements:
-- Modern POS UI (touch-friendly, barcode scan, product search,
-  cart, payments, receipts)
-- Backend with local database (store BC mirror + offline sales)
-- Scheduled sync from BC → local database
-- Track sync status per transaction
-- Export unsynced sales as Sales Invoices — post and email
-  automatically
-- Prevent duplicate exports (idempotent sync logic using
-  externalDocumentNumber)
-- Cash payment button at checkout with on-screen receipt
-- Admin dashboard with: BC connection status, last sync timestamp,
-  error logs, force sync button
-
-Important:
-- Read AI_INSTRUCTIONS.md first — follow all rules
-- Read resources/pos-system/pos-system.md for exact BC queries
-  and architecture
-- Credentials stored as Lovable Secrets
-
-API Reference:
-github.com/JonasDalgasKristiansen/bc-api-reference
-```
 
 ---
 
