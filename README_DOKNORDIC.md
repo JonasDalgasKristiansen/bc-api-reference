@@ -105,8 +105,6 @@ $select=id,number,displayName,email,balance,overdueAmount
 $select=id,number,displayName,email,phoneNumber,addressLine1,city,postalCode
 ```
 
-You won't find this in Microsoft's documentation. We found it by testing.
-
 **4. It gets authentication wrong**
 
 BC uses OAuth2 Client Credentials — not API keys, not basic auth. Lovable doesn't know this. It'll either skip auth entirely, use the wrong flow, or hardcode credentials in the frontend.
